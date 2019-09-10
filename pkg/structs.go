@@ -12,14 +12,15 @@ type ServerConfig struct {
 	EnableIntrospection bool
 	Port                int
 	Endpoint            string
-	Models              map[string]Model
-	Queries             map[string]Resolvable
+	Models              []Model
+	Queries             []Resolvable
 	DatabaseDriver      DatabaseDriver
 }
 
 // Model -
 type Model struct {
 	Name       string
+	Table      string
 	PrimaryKey string
 	Fields     map[string]Field
 }
@@ -33,7 +34,8 @@ type Field struct {
 type Scalar struct {
 	Name        string
 	Description string
-	FromJSON    func(jsonValue) interface{}
+	FromJSON    func(jsonValue interface{}) interface{}
+	ToJSON      func(value interface{}) interface{}
 }
 
 // Resolvable -
@@ -46,12 +48,27 @@ type DatabaseDriver struct {
 	Connect func()
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// ModelMapItem -
+type ModelMapItem struct {
+	Model     Model
+	Queries   []Resolvable
+	Mutations []Resolvable
+}
+
+// ModelMap -
+type ModelMap = map[string]ModelMapItem
+
+// CustomScalarMap -
+type CustomScalarMap = map[string]Scalar
+
 type statusWriter struct {
 	http.ResponseWriter
 	status int
 }
 
-func (rec *statusWriter) WriteHeader(code int) {
-	rec.status = code
-	rec.ResponseWriter.WriteHeader(code)
+func (w *statusWriter) WriteHeader(code int) {
+	w.status = code
+	w.ResponseWriter.WriteHeader(code)
 }

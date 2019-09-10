@@ -7,17 +7,27 @@ import (
 	"time"
 )
 
-var isDev = os.Getenv("DEV") == "true"
+var isDev bool
 
 func requestLogger(next http.Handler) http.Handler {
+	isDev = os.Getenv("DEV") == "true"
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		tic := time.Now()
-		statusRes := statusWriter{res, 200}
-		next.ServeHTTP(res, req)
+		statusRes := statusWriter{ResponseWriter: res}
+		next.ServeHTTP(&statusRes, req)
 		if statusRes.status >= 400 || isDev {
 			ns := float64(time.Now().Sub(tic).Nanoseconds())
+			color := "0"
+			if (statusRes.status >= 500) {
+				color = "91"
+			} else if statusRes.status >= 400 {
+				color = "93"
+			} else if statusRes.status >= 300 {
+				color = "92"
+			}
 			message := fmt.Sprintf(
-				"[%s] %s %s (%s ms) %d",
+				"  \x1b[%sm[%s] %s %s (%s ms) %d\x1b[0m",
+				color,
 				req.RemoteAddr,
 				req.Method,
 				req.URL,

@@ -5,14 +5,15 @@ import (
 )
 
 func main() {
-	framework.Start(framework.ServerConfig{
+	server := framework.ServerConfig{
 		EnableIntrospection: true,
 		Port:                8080,
 		Endpoint:            "/graphql",
 
-		Models: map[string]framework.Model{
-			"todos": framework.Model{
+		Models: []framework.Model{
+			framework.Model{
 				Name:       "Todo",
+				Table:      "todos",
 				PrimaryKey: "id",
 				Fields: map[string]framework.Field{
 					"id": framework.Field{
@@ -28,5 +29,6 @@ func main() {
 			Name:    "Postgres",
 			Connect: func() {},
 		},
-	})
+	}
+	server.Start()
 }

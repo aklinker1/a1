@@ -5,44 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	graphql "github.com/graphql-go/graphql"
 )
-
-// StartWebServer - starts the server
-func StartWebServer(serverConfig ServerConfig, s graphql.Schema) {
-	schema = s
-	endpoint := serverConfig.Endpoint
-	if endpoint == "" {
-		endpoint = "/graphql"
-	}
-	port := serverConfig.Port
-	if port == 0 {
-		port = 8000
-	}
-	handler := http.HandlerFunc(graphqlHandler)
-	http.Handle(endpoint, requestLogger(methodFilter(allowCors(handler))))
-
-	if isDev {
-		done := make(chan bool)
-		go (func() {
-			log.Fatal(http.ListenAndServe(
-				fmt.Sprintf(":%d", port),
-				nil,
-			))
-		})()
-		fmt.Printf("\nServer started at http://localhost:%d%s\n", port, endpoint)
-		fmt.Println("\n  ─────\n")
-		<-done
-	} else {
-		log.Fatal(http.ListenAndServe(
-			fmt.Sprintf(":%d", port),
-			nil,
-		))
-	}
-}
 
 func graphqlHandler(res http.ResponseWriter, req *http.Request) {
 	body, err := ioutil.ReadAll(req.Body)
