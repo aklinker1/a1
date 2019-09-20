@@ -2,7 +2,7 @@ package main
 
 import (
 	framework "github.com/aklinker1/graphql-framework/pkg"
-	drivers "github.com/aklinker1/graphql-framework/pkg/drivers"
+	postgres "github.com/aklinker1/graphql-framework/pkg/drivers/postgres"
 )
 
 func main() {
@@ -26,7 +26,7 @@ func main() {
 				},
 			},
 		},
-		DatabaseDriver: drivers.CreatePostgresDriver(),
+		DatabaseDriver: postgres.CreateDriver(),
 	}
 	server.Start()
 }

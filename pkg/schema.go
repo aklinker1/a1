@@ -32,38 +32,22 @@ func CreateSchema(serverConfig ServerConfig) (graphql.Schema, error) {
 	}
 
 	// Parse Mutations
-	// mutationResolvables := createMutationMap(modelMap)
+	mutationResolvables := createMutationMap(modelMap, scalarMap)
 	mutationFields := graphql.Fields{
 		"Test": nil,
 	}
-	// for _, mutation := range mutationResolvables {
-	// 	mutationFields[mutation.Name] = &graphql.Field{}
-	// }
+	for _, mutation := range mutationResolvables {
+		mutationFields[mutation.Name] = &graphql.Field{}
+	}
 
 	// Setup the Schema
 	queries := graphql.ObjectConfig{
 		Name:   "RootQuery",
 		Fields: queryFields,
-		// Fields: graphql.Fields{
-		// 	"query": &graphql.Field{
-		// 		Type: graphql.String,
-		// 		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		// 			return "world", nil
-		// 		},
-		// 	},
-		// },
 	}
 	mutations := graphql.ObjectConfig{
 		Name:   "RootMutation",
 		Fields: mutationFields,
-		// Fields: graphql.Fields{
-		// 	"mutate": &graphql.Field{
-		// 		Type: graphql.String,
-		// 		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		// 			return "world", nil
-		// 		},
-		// 	},
-		// },
 	}
 
 	// Setup the GraphQL Schema

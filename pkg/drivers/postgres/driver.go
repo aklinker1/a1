@@ -1,4 +1,4 @@
-package drivers
+package postgres
 
 import (
 	"fmt"
@@ -12,8 +12,8 @@ var todos = map[interface{}]string{
 	3: "",
 }
 
-// CreatePostgresDriver -
-func CreatePostgresDriver() framework.DatabaseDriver {
+// CreateDriver -
+func CreateDriver() framework.DatabaseDriver {
 	return framework.DatabaseDriver{
 		Name:    "PostgreSQL",
 		Connect: func() {},
