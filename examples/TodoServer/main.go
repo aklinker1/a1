@@ -7,7 +7,7 @@ import (
 func main() {
 	server := framework.ServerConfig{
 		EnableIntrospection: true,
-		Port:                8080,
+		Port:                8000,
 		Endpoint:            "/graphql",
 
 		Models: []framework.Model{
@@ -17,10 +17,10 @@ func main() {
 				PrimaryKey: "id",
 				Fields: map[string]framework.Field{
 					"id": framework.Field{
-						Type: framework.Int,
+						Type: "Int",
 					},
 					"title": framework.Field{
-						Type: framework.String,
+						Type: "String",
 					},
 				},
 			},
