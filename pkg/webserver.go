@@ -40,7 +40,7 @@ func graphqlHandler(res http.ResponseWriter, req *http.Request) {
 	if len(result.Errors) > 0 {
 		var finalStatus int
 		if result.Data != nil {
-			responseMap := result.Data.(map[string]interface{})
+			responseMap := result.Data.(StringMap)
 			for _, value := range responseMap {
 				if status, ok := value.(int); ok {
 					if status > finalStatus {

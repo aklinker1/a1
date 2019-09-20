@@ -2,6 +2,6 @@ package pkg
 
 // ConnectDatabase -
 func ConnectDatabase(driver DatabaseDriver) error {
-	driver.Connect();
+	driver.Connect()
 	return nil
 }

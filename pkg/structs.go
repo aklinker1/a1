@@ -8,8 +8,8 @@ import (
 )
 
 type requestBody struct {
-	Query     string                 `json:"query"`
-	Variables map[string]interface{} `json:"variables"`
+	Query     string    `json:"query"`
+	Variables StringMap `json:"variables"`
 }
 
 // ServerConfig -
@@ -58,17 +58,19 @@ type Scalar struct {
 
 // Resolvable -
 type Resolvable struct {
-	Name      string
-	Returns   Model
-	Arguments []Argument
-	Resolver  func(args ArgumentMap, fields FieldMap) (Model, error)
+	Model       Model
+	Name        string
+	Description string
+	Returns     Model
+	Arguments   []Argument
+	Resolver    func(args StringMap, fields StringMap) (StringMap, error)
 }
 
 // DatabaseDriver -
 type DatabaseDriver struct {
 	Name      string
 	Connect   func()
-	SelectOne func(primaryKey interface{}, fieldMap FieldMap) (Model, error)
+	SelectOne func(model Model, primaryKey interface{}, fieldMap StringMap) (StringMap, error)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -93,20 +95,19 @@ type statusWriter struct {
 
 func (w *statusWriter) WriteHeader(code int) {
 	w.status = code
-	type ArgumentMap = map[string]interface{}
+	type ArgumentMap = StringMap
 }
 
 // Argument -
 type Argument struct {
-	Key  string
-	Type Field
+	Name         string
+	Description  string
+	Type         string
+	DefaultValue interface{}
 }
 
-// ArgumentMap -
-type ArgumentMap = map[string]Argument
-
-// FieldMap -
-type FieldMap = map[string]Field
+// StringMap -
+type StringMap = map[string]interface{}
 
 // ASTValue -
 type ASTValue = ast.Value

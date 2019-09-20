@@ -8,6 +8,7 @@ func convertModelToOutput(model Model, scalars CustomScalarMap) *graphql.Object 
 	outputFields := graphql.Fields{}
 	for fieldName, field := range model.Fields {
 		outputFields[fieldName] = &graphql.Field{
+			Name: fieldName,
 			Type: scalars[field.Type],
 		}
 	}

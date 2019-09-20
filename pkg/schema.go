@@ -28,13 +28,7 @@ func CreateSchema(serverConfig ServerConfig) (graphql.Schema, error) {
 	queryResolvables := createQueryResolvables(modelMap, scalarMap)
 	queryFields := graphql.Fields{}
 	for _, query := range queryResolvables {
-		queryFields[query.Name] = &graphql.Field{
-			Name: query.Name,
-			Type: convertModelToOutput(query.Returns, scalarMap),
-			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return nil, nil
-			},
-		}
+		queryFields[query.Name] = convertResolver(query, scalarMap)
 	}
 
 	// Parse Mutations
@@ -80,6 +74,57 @@ func CreateSchema(serverConfig ServerConfig) (graphql.Schema, error) {
 	}
 
 	return graphql.NewSchema(schemaConfig)
+}
+
+// Resolvers ///////////////////////////////////////////////////////////////////
+
+func middlewareResolver(resolver *Resolvable) func(params graphql.ResolveParams) (interface{}, error) {
+	return func(params graphql.ResolveParams) (interface{}, error) {
+		// Check Authorization
+		// myUser, err := middleware.Authorize(params.Context, function.AuthRequired)
+		// if err != nil {
+		// 	return 401, err
+		// }
+
+		// // Check Role Level
+		// if myUser != nil {
+		// 	err = middleware.CheckRole(myUser, function.MinRole)
+		// 	if err != nil {
+		// 		return 403, err
+		// 	}
+		// }
+
+		// Get argument map
+		args := params.Args
+
+		// Get field map
+		fields := StringMap{}
+
+		// Call Resolver
+		return resolver.Resolver(args, fields)
+	}
+}
+
+func convertArguments(arguments []Argument, scalars map[string]graphql.Type) graphql.FieldConfigArgument {
+	config := graphql.FieldConfigArgument{}
+	for _, argument := range arguments {
+		config[argument.Name] = &graphql.ArgumentConfig{
+			Type:         scalars[argument.Type],
+			DefaultValue: argument.DefaultValue,
+			Description:  argument.Description,
+		}
+	}
+	return config
+}
+
+func convertResolver(resolver *Resolvable, scalars map[string]graphql.Type) *graphql.Field {
+	return &graphql.Field{
+		Name:        resolver.Name,
+		Description: resolver.Description,
+		Args:        convertArguments(resolver.Arguments, scalars),
+		Type:        convertModelToOutput(resolver.Model, scalars),
+		Resolve:     middlewareResolver(resolver),
+	}
 }
 
 // Scalars /////////////////////////////////////////////////////////////////////
