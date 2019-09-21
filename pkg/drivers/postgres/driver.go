@@ -3,7 +3,7 @@ package postgres
 import (
 	"fmt"
 
-	framework "github.com/aklinker1/graphql-framework/pkg"
+	a1 "github.com/aklinker1/a1/pkg"
 )
 
 var todos = map[interface{}]string{
@@ -13,11 +13,11 @@ var todos = map[interface{}]string{
 }
 
 // CreateDriver -
-func CreateDriver() framework.DatabaseDriver {
-	return framework.DatabaseDriver{
+func CreateDriver() a1.DatabaseDriver {
+	return a1.DatabaseDriver{
 		Name:    "PostgreSQL",
 		Connect: func() {},
-		SelectOne: func(model framework.Model, id interface{}, fields framework.StringMap) (framework.StringMap, error) {
+		SelectOne: func(model a1.Model, id interface{}, fields a1.StringMap) (a1.StringMap, error) {
 			output := map[string]interface{}{}
 			todo, ok := todos[id]
 			if !ok {

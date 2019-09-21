@@ -1,26 +1,26 @@
 package main
 
 import (
-	framework "github.com/aklinker1/graphql-framework/pkg"
-	postgres "github.com/aklinker1/graphql-framework/pkg/drivers/postgres"
+	a1 "github.com/aklinker1/a1/pkg"
+	postgres "github.com/aklinker1/a1/pkg/drivers/postgres"
 )
 
 func main() {
-	server := framework.ServerConfig{
+	server := a1.ServerConfig{
 		EnableIntrospection: true,
 		Port:                8000,
 		Endpoint:            "/graphql",
 
-		Models: []framework.Model{
-			framework.Model{
+		Models: []a1.Model{
+			a1.Model{
 				Name:       "Todo",
 				Table:      "todos",
 				PrimaryKey: "id",
-				Fields: map[string]framework.Field{
-					"id": framework.Field{
+				Fields: map[string]a1.Field{
+					"id": a1.Field{
 						Type: "Int",
 					},
-					"title": framework.Field{
+					"title": a1.Field{
 						Type: "String",
 					},
 				},
