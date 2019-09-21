@@ -18,12 +18,14 @@ func requestLogger(next http.Handler) http.Handler {
 		if statusRes.status >= 400 || isDev {
 			ns := float64(time.Now().Sub(tic).Nanoseconds())
 			color := "0"
-			if (statusRes.status >= 500) {
+			if statusRes.status >= 500 {
 				color = "91"
 			} else if statusRes.status >= 400 {
 				color = "93"
 			} else if statusRes.status >= 300 {
 				color = "92"
+			} else if statusRes.status == 0 {
+				statusRes.status = 200
 			}
 			message := fmt.Sprintf(
 				"  \x1b[%sm[%s] %s %s (%s ms) %d\x1b[0m",

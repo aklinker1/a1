@@ -30,6 +30,7 @@ func (server ServerConfig) Start() {
 		fmt.Printf("    - ENV_FILE: %s\n", envFile)
 		fmt.Printf("    - DEV: %t\n", os.Getenv("DEV") == "true")
 		fmt.Printf("    - VERBOSE: %t\n", isVerbose)
+		fmt.Printf("    - STARTUP_ONLY: %t\n", os.Getenv("STARTUP_ONLY") == "true")
 		fmt.Printf("    \x1b[92mLoaded\x1b[92m")
 	}
 	if err != nil {
@@ -95,6 +96,10 @@ func (server ServerConfig) Start() {
 	fmt.Println(" \x1b[92m\x1b[1m(✔)\x1b[0m")
 
 	// Start the server
+	if os.Getenv("STARTUP_ONLY") == "true" {
+		fmt.Println()
+		return
+	}
 	startWebServer(server, schema)
 }
 
@@ -110,6 +115,11 @@ func startWebServer(server ServerConfig, s graphql.Schema) {
 	}
 	handler := http.HandlerFunc(graphqlHandler)
 	http.Handle(endpoint, requestLogger(methodFilter(allowCors(handler))))
+
+	if isDev {
+		endpoint := fmt.Sprintf("http://localhost:%d%s", port, endpoint)
+		fmt.Printf("  - Starting at \x1b[1m%s\x1b[0m\n", endpoint)
+	}
 
 	fmt.Println("\n\x1b[1mLogs:\x1b[0m\n")
 	log.Fatal(http.ListenAndServe(

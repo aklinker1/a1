@@ -2,12 +2,13 @@ package main
 
 import (
 	framework "github.com/aklinker1/graphql-framework/pkg"
+	postgres "github.com/aklinker1/graphql-framework/pkg/drivers/postgres"
 )
 
 func main() {
 	server := framework.ServerConfig{
 		EnableIntrospection: true,
-		Port:                8080,
+		Port:                8000,
 		Endpoint:            "/graphql",
 
 		Models: []framework.Model{
@@ -17,18 +18,15 @@ func main() {
 				PrimaryKey: "id",
 				Fields: map[string]framework.Field{
 					"id": framework.Field{
-						Type: framework.Int,
+						Type: "Int",
 					},
 					"title": framework.Field{
-						Type: framework.String,
+						Type: "String",
 					},
 				},
 			},
 		},
-		DatabaseDriver: framework.DatabaseDriver{
-			Name:    "Postgres",
-			Connect: func() {},
-		},
+		DatabaseDriver: postgres.CreateDriver(),
 	}
 	server.Start()
 }
