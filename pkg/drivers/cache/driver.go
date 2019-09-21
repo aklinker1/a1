@@ -1,4 +1,4 @@
-package postgres
+package cache
 
 import (
 	"fmt"
@@ -6,20 +6,14 @@ import (
 	a1 "github.com/aklinker1/a1/pkg"
 )
 
-var todos = map[interface{}]string{
-	1: "Todo 1",
-	2: "Todo 2",
-	3: "",
-}
-
 // CreateDriver -
-func CreateDriver() a1.DatabaseDriver {
+func CreateDriver(localData map[string]map[interface{}]interface{}) a1.DatabaseDriver {
 	return a1.DatabaseDriver{
-		Name:    "PostgreSQL",
+		Name:    "Cache Map",
 		Connect: func() {},
 		SelectOne: func(model a1.Model, id interface{}, fields a1.StringMap) (a1.StringMap, error) {
-			output := map[string]interface{}{}
-			todo, ok := todos[id]
+			output := a1.StringMap{}
+			todo, ok := localData[model.Name][id]
 			if !ok {
 				return nil, fmt.Errorf("'%s' with %s=%v does not exist", model.Name, model.PrimaryKey, id)
 			}

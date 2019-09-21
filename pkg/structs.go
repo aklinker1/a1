@@ -45,7 +45,26 @@ type Field struct {
 	Name        string
 	Description string
 	Type        string
+	Linking     FieldLink
 }
+
+// FieldLink -
+type FieldLink struct {
+	ForeignKey string
+	Type       LinkingType
+}
+
+// LinkingType - `OneToOne` or `ManyToOne`
+type LinkingType string
+
+const (
+	// OneToOne -
+	OneToOne LinkingType = "OneToOne"
+	// ManyToOne -
+	ManyToOne LinkingType = "ManyToOne"
+	// ManyToMany -
+	ManyToMany LinkingType = "ManyToMany"
+)
 
 // Scalar -
 type Scalar struct {

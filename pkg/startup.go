@@ -60,7 +60,7 @@ func (server ServerConfig) Start() {
 	}
 
 	// Create the GraphQL Schema
-	fmt.Print("  - Creating the \x1b[1m\x1b[95mGraphQL Schema\x1b[0m from models")
+	fmt.Print("  - Creating the \x1b[1m\x1b[95mGraphQL Schema\x1b[0m from your models")
 	schema, err = CreateSchema(server)
 	if err != nil {
 		fmt.Println(" \x1b[91m\x1b[1m(✘)\x1b[0m\n")
