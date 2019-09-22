@@ -9,6 +9,8 @@ import (
 
 	graphql "github.com/graphql-go/graphql"
 	godotenv "github.com/joho/godotenv"
+
+	utils "github.com/aklinker1/a1/pkg/utils"
 )
 
 var schema graphql.Schema
@@ -25,13 +27,13 @@ func (server ServerConfig) Start() {
 		envFile = ".env"
 	}
 	err := godotenv.Load(envFile)
-	isVerbose := IsVerbose()
+	isVerbose := utils.IsVerbose()
 	if isVerbose {
 		fmt.Println("\n    [Environment]")
-		fmt.Printf("    - ENV_FILE: %s\n", envFile)
-		fmt.Printf("    - DEV: %t\n", os.Getenv("DEV") == "true")
-		fmt.Printf("    - VERBOSE: %t\n", isVerbose)
-		fmt.Printf("    - STARTUP_ONLY: %t\n", os.Getenv("STARTUP_ONLY") == "true")
+		fmt.Printf("      - ENV_FILE: %s\n", envFile)
+		fmt.Printf("      - DEV: %t\n", os.Getenv("DEV") == "true")
+		fmt.Printf("      - VERBOSE: %t\n", isVerbose)
+		fmt.Printf("      - STARTUP_ONLY: %t\n", os.Getenv("STARTUP_ONLY") == "true")
 		fmt.Printf("    \x1b[92mLoaded\x1b[92m")
 	}
 	if err != nil {

@@ -1,4 +1,4 @@
-package pkg
+package utils
 
 import (
 	"fmt"
@@ -6,14 +6,16 @@ import (
 	"unicode"
 )
 
-func pluralize(count int, singular string, plural string) string {
+// Pluralize -
+func Pluralize(count int, singular string, plural string) string {
 	if count == 1 {
 		return fmt.Sprintf("%d %s", count, singular)
 	}
 	return fmt.Sprintf("%d %s", count, plural)
 }
 
-func lowerFirstChar(str string) string {
+// LowerFirstChar -
+func LowerFirstChar(str string) string {
 	for i, v := range str {
 		return string(unicode.ToLower(v)) + str[i+1:]
 	}
