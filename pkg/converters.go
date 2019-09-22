@@ -36,7 +36,7 @@ func (serverConfig ServerConfig) graphqlSchema() (graphql.Schema, error) {
 		mutationFields[mutation.Name] = &graphql.Field{}
 	}
 
-	// Setup the Schema
+	// Setup the resolvers
 	queries := graphql.ObjectConfig{
 		Name:   "RootQuery",
 		Fields: queryFields,
