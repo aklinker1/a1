@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"os"
+	"strings"
 	"unicode"
 )
 
@@ -12,6 +13,14 @@ func Pluralize(count int, singular string, plural string) string {
 		return fmt.Sprintf("%d %s", count, singular)
 	}
 	return fmt.Sprintf("%d %s", count, plural)
+}
+
+// AddS -
+func AddS(str string) string {
+	if strings.HasSuffix(str, "s") {
+		return str
+	}
+	return str + "s"
 }
 
 // LowerFirstChar -
