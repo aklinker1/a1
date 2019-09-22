@@ -90,11 +90,23 @@ func (resolver *Resolvable) graphqlResolver() func(params graphql.ResolveParams)
 		// Call Resolver
 		result, err := resolver.Resolver(args, fields)
 		if err != nil {
-
 			return nil, err
 		}
-		if len(result) == 0 {
-			return nil, nil
+		resultMap, isMap := result.(StringMap)
+		if isMap {
+			utils.Log("Resolved JSON Object: %v", resultMap)
+			if len(resultMap) == 0 {
+				return nil, nil
+			}
+			return result, nil
+		}
+		resultArray, isArray := result.([]StringMap)
+		if isArray {
+			utils.Log("Resolved JSON Array[%d]: %v", len(resultArray), resultArray)
+			if len(resultArray) == 0 {
+				return []interface{}{}, nil
+			}
+			return resultArray, nil
 		}
 		return result, nil
 	}
@@ -113,11 +125,15 @@ func graphqlArguments(arguments []Argument, customTypes CustomTypes) graphql.Fie
 }
 
 func (resolver *Resolvable) graphqlEntry(customTypes CustomTypes) *graphql.Field {
+	var returnType graphql.Output = customTypes.Outputs[resolver.ModelName]
+	if resolver.ResturnsList {
+		returnType = graphql.NewList(customTypes.Outputs[resolver.ModelName])
+	}
 	return &graphql.Field{
 		Name:        resolver.Name,
 		Description: resolver.Description,
 		Args:        graphqlArguments(resolver.Arguments, customTypes),
-		Type:        customTypes.Outputs[resolver.ModelName],
+		Type:        returnType,
 		Resolve:     resolver.graphqlResolver(),
 	}
 }
@@ -281,6 +297,7 @@ func (model Model) outputType(modelName string, scalars CustomScalarMap) *graphq
 func (model Model) createModelItem(modelName string, serverconfig ServerConfig) ModelMapItem {
 	queries := []*Resolvable{
 		selectOneQuery(modelName, model, serverconfig),
+		selectMultipleQuery(modelName, model, serverconfig),
 	}
 	if model.GraphQL.CustomQueries != nil {
 		queries = append(queries, model.GraphQL.CustomQueries...)

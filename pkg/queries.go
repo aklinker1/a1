@@ -5,11 +5,13 @@ import (
 )
 
 func applyLinks(data StringMap, serverConfig ServerConfig, modelName string, model Model, requestedFields StringMap) (err error) {
+	isAlreadyLinkedMap := map[string]*LinkedField{}
 	for fieldName, field := range model.Fields {
 		link := field.Linking
 
 		if link != nil {
 			// If there is a linking object directly on the model
+			isAlreadyLinkedMap[link.AccessedAs] = link
 			requestedType, areRequestingLinkedField := requestedFields[link.AccessedAs]
 			nextRequestedFields, isRequestedFieldMap := requestedType.(StringMap)
 			if areRequestingLinkedField && isRequestedFieldMap {
@@ -25,9 +27,21 @@ func applyLinks(data StringMap, serverConfig ServerConfig, modelName string, mod
 		}
 	}
 	for requestedField := range requestedFields {
+		nextRequestedFields, isLinkedObject := requestedFields[requestedField].(StringMap)
 		_, modelHasRequestedField := model.Fields[requestedField]
-		if !modelHasRequestedField {
-			utils.Log("Field not mapped (%v): %v", model.Fields, requestedField)
+		_, isAlreadyLinked := isAlreadyLinkedMap[requestedField]
+		if isLinkedObject && !modelHasRequestedField && !isAlreadyLinked {
+			for nextModelName, nextModel := range serverConfig.Models {
+				for fieldName, field := range nextModel.Fields {
+					if field.Linking != nil && field.Linking.ReverseAccessedAs == requestedField {
+						link := field.Linking
+						utils.Log("Reverse linking %s.%s by %s.%s=%v", link.ModelName, requestedField, nextModelName, fieldName, data[link.ForeignKey])
+						searchArgs := map[string]interface{}{}
+						items, _ := selectMultiple(serverConfig, nextModelName, nextModel, searchArgs, nextRequestedFields)
+						data[requestedField] = items
+					}
+				}
+			}
 		}
 	}
 	return nil
@@ -54,15 +68,44 @@ func selectOneQuery(modelName string, model Model, serverConfig ServerConfig) *R
 		Model:     model,
 		ModelName: modelName,
 		Name:      utils.LowerFirstChar(modelName),
-		Returns:   model,
 		Arguments: []Argument{
 			Argument{
 				Name: model.PrimaryKey,
 				Type: "Int",
 			},
 		},
-		Resolver: func(args StringMap, fields StringMap) (StringMap, error) {
-			return selectOne(serverConfig, modelName, model, args[model.PrimaryKey], fields)
+		Resolver: func(args StringMap, requestedFields StringMap) (interface{}, error) {
+			return selectOne(serverConfig, modelName, model, args[model.PrimaryKey], requestedFields)
+		},
+	}
+}
+
+func selectMultiple(serverConfig ServerConfig, modelName string, model Model, args StringMap, requestedFields StringMap) ([]StringMap, error) {
+	// Get data
+	items, err := serverConfig.DatabaseDriver.SelectMultiple(model, args, requestedFields)
+	if err != nil {
+		return nil, err
+	}
+
+	// Apply linked data
+	for _, item := range items {
+		err = applyLinks(item, serverConfig, modelName, model, requestedFields)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return items, nil
+}
+
+func selectMultipleQuery(modelName string, model Model, serverConfig ServerConfig) *Resolvable {
+	return &Resolvable{
+		Model:        model,
+		ModelName:    modelName,
+		Name:         utils.AddS(utils.LowerFirstChar(modelName)),
+		ResturnsList: true,
+		Resolver: func(args StringMap, requestedFields StringMap) (interface{}, error) {
+			return selectMultiple(serverConfig, modelName, model, args, requestedFields)
 		},
 	}
 }

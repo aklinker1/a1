@@ -70,20 +70,21 @@ type Scalar struct {
 
 // Resolvable -
 type Resolvable struct {
-	Model       Model
-	ModelName   string
-	Name        string
-	Description string
-	Returns     Model
-	Arguments   []Argument
-	Resolver    func(args StringMap, fields StringMap) (StringMap, error)
+	Model        Model
+	ModelName    string
+	Name         string
+	Description  string
+	ResturnsList bool
+	Arguments    []Argument
+	Resolver     func(args StringMap, fields StringMap) (interface{}, error)
 }
 
 // DatabaseDriver -
 type DatabaseDriver struct {
-	Name      string
-	Connect   func()
-	SelectOne func(model Model, primaryKey interface{}, fieldMap StringMap) (StringMap, error)
+	Name           string
+	Connect        func()
+	SelectOne      func(model Model, primaryKey interface{}, fieldMap StringMap) (StringMap, error)
+	SelectMultiple func(model Model, searchFields StringMap, fields StringMap) ([]StringMap, error)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
