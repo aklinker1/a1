@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	utils "github.com/aklinker1/a1/pkg/utils"
 	graphql "github.com/graphql-go/graphql"
 )
 
@@ -64,7 +65,7 @@ func (serverConfig ServerConfig) graphqlSchema() (graphql.Schema, error) {
 
 func (resolver *Resolvable) graphqlResolver() func(params graphql.ResolveParams) (interface{}, error) {
 	return func(params graphql.ResolveParams) (interface{}, error) {
-		Log("\n  %s(args: %v)", resolver.Name, resolver.Arguments)
+		utils.Log("\n  %s(args: %v)", resolver.Name, resolver.Arguments)
 		// Check Authorization
 		// myUser, err := middleware.Authorize(params.Context, function.AuthRequired)
 		// if err != nil {
@@ -83,7 +84,8 @@ func (resolver *Resolvable) graphqlResolver() func(params graphql.ResolveParams)
 		args := params.Args
 
 		// Get field map
-		fields := StringMap{}
+		fields, err := utils.ParseRequestedFields(params)
+		utils.Log("Field Map: %v", fields)
 
 		// Call Resolver
 		result, err := resolver.Resolver(args, fields)
@@ -127,7 +129,7 @@ func createQueryResolvables(modelMap ModelMap) []*Resolvable {
 		queryCount += len(modelItem.Queries)
 	}
 	if isVerbose {
-		fmt.Printf("    [%s]\n", pluralize(queryCount, "Query", "Queries"))
+		fmt.Printf("    [%s]\n", utils.Pluralize(queryCount, "Query", "Queries"))
 	}
 	queries := []*Resolvable{}
 	for _, modelItem := range modelMap {
@@ -148,7 +150,7 @@ func createMutationMap(modelMap ModelMap) []Resolvable {
 		mutationCount += len(value.Mutations)
 	}
 	if isVerbose {
-		fmt.Printf("    [%s]\n", pluralize(mutationCount, "Mutation", "Mutations"))
+		fmt.Printf("    [%s]\n", utils.Pluralize(mutationCount, "Mutation", "Mutations"))
 	}
 	return nil
 }
@@ -160,7 +162,7 @@ func createTypes(serverConfig ServerConfig) CustomTypes { // combine input types
 	models := serverConfig.Models
 	isVerbose := os.Getenv("VERBOSE") == "true"
 	if isVerbose {
-		fmt.Printf("    [%s]\n", pluralize(len(scalars), "Scalar", "Scalars"))
+		fmt.Printf("    [%s]\n", utils.Pluralize(len(scalars), "Scalar", "Scalars"))
 	}
 	scalarMap := map[string]graphql.Type{
 		"String":   graphql.String,
@@ -295,7 +297,7 @@ func createModelMap(serverConfig ServerConfig, customTypes CustomTypes) ModelMap
 	models := serverConfig.Models
 	isVerbose := os.Getenv("VERBOSE") == "true"
 	if isVerbose {
-		fmt.Printf("    [%s]\n", pluralize(len(models), "Model", "Models"))
+		fmt.Printf("    [%s]\n", utils.Pluralize(len(models), "Model", "Models"))
 	}
 
 	modelMap := map[string]ModelMapItem{}

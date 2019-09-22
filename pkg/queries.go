@@ -1,5 +1,9 @@
 package pkg
 
+import (
+	utils "github.com/aklinker1/a1/pkg/utils"
+)
+
 func applyLinks(data StringMap, serverConfig ServerConfig, modelName string, model Model, requestedFields StringMap) (err error) {
 	for fieldName, field := range model.Fields {
 		link := field.Linking
@@ -9,7 +13,7 @@ func applyLinks(data StringMap, serverConfig ServerConfig, modelName string, mod
 			requestedType, areRequestingLinkedField := requestedFields[link.AccessedAs]
 			nextRequestedFields, isRequestedFieldMap := requestedType.(StringMap)
 			if areRequestingLinkedField && isRequestedFieldMap {
-				Log("Linking %s.%s by %s.%s=%v", modelName, link.AccessedAs, link.ModelName, fieldName, data[fieldName])
+				utils.Log("Linking %s.%s by %s.%s=%v", modelName, link.AccessedAs, link.ModelName, fieldName, data[fieldName])
 				linkedValue, err := selectOne(serverConfig, link.ModelName, serverConfig.Models[link.ModelName], data[fieldName], nextRequestedFields)
 				if err != nil {
 					return err
@@ -23,24 +27,13 @@ func applyLinks(data StringMap, serverConfig ServerConfig, modelName string, mod
 	for requestedField := range requestedFields {
 		_, modelHasRequestedField := model.Fields[requestedField]
 		if !modelHasRequestedField {
-			Log("Field not mapped (%v): %v", model.Fields, requestedField)
+			utils.Log("Field not mapped (%v): %v", model.Fields, requestedField)
 		}
 	}
 	return nil
 }
 
 func selectOne(serverConfig ServerConfig, modelName string, model Model, primaryKey interface{}, requestedFields StringMap) (StringMap, error) {
-	// TODO: Mocking for now, remove
-	requestedFields = StringMap{
-		"id":      "ID",
-		"title":   "String",
-		"_userId": "ID",
-		"user": StringMap{
-			"id":       "ID",
-			"username": "String",
-		},
-	}
-
 	// Get data
 	data, err := serverConfig.DatabaseDriver.SelectOne(model, primaryKey, requestedFields)
 	if err != nil {
@@ -60,7 +53,7 @@ func selectOneQuery(modelName string, model Model, serverConfig ServerConfig) *R
 	return &Resolvable{
 		Model:     model,
 		ModelName: modelName,
-		Name:      lowerFirstChar(modelName),
+		Name:      utils.LowerFirstChar(modelName),
 		Returns:   model,
 		Arguments: []Argument{
 			Argument{
