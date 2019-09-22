@@ -17,15 +17,14 @@ type ServerConfig struct {
 	EnableIntrospection bool
 	Port                int
 	Endpoint            string
-	Models              []Model
-	Scalars             []Scalar
+	Models              map[string]Model
+	Scalars             map[string]Scalar
 	Queries             []Resolvable
 	DatabaseDriver      DatabaseDriver
 }
 
 // Model -
 type Model struct {
-	Name        string
 	Description string
 	Table       string
 	PrimaryKey  string
@@ -45,7 +44,20 @@ type Field struct {
 	Name        string
 	Description string
 	Type        string
+	Linking     *LinkedField
 }
+
+// LinkedField -
+type LinkedField struct {
+	AccessedAs        string
+	ReverseAccessedAs string
+	ModelName         string
+	ForeignKey        string
+	Type              LinkingType
+}
+
+// LinkingType - `OneToOne` or `ManyToOne`
+type LinkingType string
 
 // Scalar -
 type Scalar struct {
@@ -59,6 +71,7 @@ type Scalar struct {
 // Resolvable -
 type Resolvable struct {
 	Model       Model
+	ModelName   string
 	Name        string
 	Description string
 	Returns     Model
@@ -111,3 +124,10 @@ type StringMap = map[string]interface{}
 
 // ASTValue -
 type ASTValue = ast.Value
+
+// CustomTypes -
+type CustomTypes struct {
+	Types   map[string]graphql.Type
+	Outputs map[string]*graphql.Object
+	Inputs  map[string]*graphql.InputObject
+}

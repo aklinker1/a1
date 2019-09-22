@@ -15,7 +15,8 @@ var schema graphql.Schema
 
 // Start the server
 func (server ServerConfig) Start() {
-	fmt.Println("\x1b[1mStarting Server:\x1b[0m\n")
+	fmt.Println("\x1b[1mStarting Server:\x1b[0m")
+	fmt.Println()
 
 	// Load env variables
 	fmt.Print("  - Loading \x1b[1m\x1b[96mEnvironment Vairables\x1b[0m from \x1b[3m.env\x1b[0m")
@@ -24,7 +25,7 @@ func (server ServerConfig) Start() {
 		envFile = ".env"
 	}
 	err := godotenv.Load(envFile)
-	isVerbose := os.Getenv("VERBOSE") == "true"
+	isVerbose := IsVerbose()
 	if isVerbose {
 		fmt.Println("\n    [Environment]")
 		fmt.Printf("    - ENV_FILE: %s\n", envFile)
@@ -34,7 +35,8 @@ func (server ServerConfig) Start() {
 		fmt.Printf("    \x1b[92mLoaded\x1b[92m")
 	}
 	if err != nil {
-		fmt.Println(" \x1b[91m\x1b[1m(✘)\x1b[0m\n")
+		fmt.Println(" \x1b[91m\x1b[1m(✘)\x1b[0m")
+		fmt.Println()
 		fmt.Printf("        Error loading '%s': %v\n\n", envFile, err)
 	} else {
 		fmt.Println(" \x1b[92m\x1b[1m(✔)\x1b[0m")
@@ -47,8 +49,11 @@ func (server ServerConfig) Start() {
 	fmt.Printf("  - Connecting to \x1b[1m\x1b[94m%s\x1b[0m", server.DatabaseDriver.Name)
 	err = ConnectDatabase(server.DatabaseDriver)
 	if err != nil {
-		fmt.Println(" \x1b[91m\x1b[1m(✘)\x1b[0m\n")
-		fmt.Printf("Failed to create connect to the database, error: %v\n\n", err)
+		fmt.Println(" \x1b[91m\x1b[1m(✘)\x1b[0m")
+		fmt.Println()
+		fmt.Printf("Failed to create connect to the database, error: %v", err)
+		fmt.Println()
+		fmt.Println()
 		os.Exit(1)
 	}
 	if isVerbose {
@@ -60,11 +65,14 @@ func (server ServerConfig) Start() {
 	}
 
 	// Create the GraphQL Schema
-	fmt.Print("  - Creating the \x1b[1m\x1b[95mGraphQL Schema\x1b[0m from models")
-	schema, err = CreateSchema(server)
+	fmt.Print("  - Creating the \x1b[1m\x1b[95mGraphQL Schema\x1b[0m from your models")
+	schema, err = server.graphqlSchema()
 	if err != nil {
-		fmt.Println(" \x1b[91m\x1b[1m(✘)\x1b[0m\n")
-		fmt.Printf("Failed to create GraphQL schema, error: %v\n\n", err)
+		fmt.Println(" \x1b[91m\x1b[1m(✘)\x1b[0m")
+		fmt.Println()
+		fmt.Printf("Failed to create GraphQL schema, error: %v", err)
+		fmt.Println()
+		fmt.Println()
 		os.Exit(1)
 	}
 	if isVerbose {
@@ -86,8 +94,11 @@ func (server ServerConfig) Start() {
 		err = fmt.Errorf("Endpoint (%s) must start with a '/'", endpoint)
 	}
 	if err != nil {
-		fmt.Println(" \x1b[91m\x1b[1m(✘)\x1b[0m\n")
-		fmt.Printf("Error: %v\n\n", err)
+		fmt.Println(" \x1b[91m\x1b[1m(✘)\x1b[0m")
+		fmt.Println()
+		fmt.Printf("Error: %v", err)
+		fmt.Println()
+		fmt.Println()
 		os.Exit(1)
 	}
 	if isVerbose {
@@ -121,7 +132,8 @@ func startWebServer(server ServerConfig, s graphql.Schema) {
 		fmt.Printf("  - Starting at \x1b[1m%s\x1b[0m\n", endpoint)
 	}
 
-	fmt.Println("\n\x1b[1mLogs:\x1b[0m\n")
+	fmt.Println("\n\x1b[1mLogs:\x1b[0m")
+	fmt.Println()
 	log.Fatal(http.ListenAndServe(
 		fmt.Sprintf(":%d", port),
 		nil,
