@@ -28,6 +28,6 @@ func IsVerbose() bool {
 // Log -
 func Log(template string, args ...interface{}) {
 	if IsVerbose() {
-		fmt.Printf("  \x1b[2m%s\x1b[0m\n", fmt.Sprintf(template, args...))
+		fmt.Printf("    \x1b[2m%s\x1b[0m\n", fmt.Sprintf(template, args...))
 	}
 }

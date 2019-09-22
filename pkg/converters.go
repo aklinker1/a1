@@ -64,6 +64,7 @@ func (serverConfig ServerConfig) graphqlSchema() (graphql.Schema, error) {
 
 func (resolver *Resolvable) graphqlResolver() func(params graphql.ResolveParams) (interface{}, error) {
 	return func(params graphql.ResolveParams) (interface{}, error) {
+		Log("\n  %s(args: %v)", resolver.Name, resolver.Arguments)
 		// Check Authorization
 		// myUser, err := middleware.Authorize(params.Context, function.AuthRequired)
 		// if err != nil {

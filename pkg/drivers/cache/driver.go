@@ -12,6 +12,7 @@ func CreateDriver(localData map[string]map[interface{}]map[string]interface{}) a
 		SelectOne: func(model a1.Model, primaryKey interface{}, fields a1.StringMap) (a1.StringMap, error) {
 			a1.Log("Selecting one from '%s', where %s=%v (%T)", model.Table, model.PrimaryKey, primaryKey, primaryKey)
 			data := localData[model.Table][primaryKey]
+			a1.Log("  - Result: %v", data)
 			return data, nil
 		},
 	}

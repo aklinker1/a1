@@ -1,23 +1,18 @@
 package pkg
 
-func applyLinks(data StringMap, serverConfig ServerConfig, model Model, requestedFields StringMap) (err error) {
+func applyLinks(data StringMap, serverConfig ServerConfig, modelName string, model Model, requestedFields StringMap) (err error) {
 	for fieldName, field := range model.Fields {
 		link := field.Linking
+
 		if link != nil {
+			// If there is a linking object directly on the model
 			requestedType, areRequestingLinkedField := requestedFields[link.AccessedAs]
 			nextRequestedFields, isRequestedFieldMap := requestedType.(StringMap)
 			if areRequestingLinkedField && isRequestedFieldMap {
-				var linkedValue StringMap
-				switch link.Type {
-				case OneToOne:
-					Log("Linking %s by %s=%v", link.ModelName, link.AccessedAs, data[fieldName])
-					linkedValue, err = selectOne(serverConfig, serverConfig.Models[link.ModelName], data[fieldName], nextRequestedFields)
-					if err != nil {
-						return err
-					}
-				case OneToMany:
-					// TODO
-					linkedValue = StringMap{}
+				Log("Linking %s.%s by %s.%s=%v", modelName, link.AccessedAs, link.ModelName, fieldName, data[fieldName])
+				linkedValue, err := selectOne(serverConfig, link.ModelName, serverConfig.Models[link.ModelName], data[fieldName], nextRequestedFields)
+				if err != nil {
+					return err
 				}
 				if len(linkedValue) != 0 {
 					data[link.AccessedAs] = linkedValue
@@ -25,10 +20,16 @@ func applyLinks(data StringMap, serverConfig ServerConfig, model Model, requeste
 			}
 		}
 	}
+	for requestedField := range requestedFields {
+		_, modelHasRequestedField := model.Fields[requestedField]
+		if !modelHasRequestedField {
+			Log("Field not mapped (%v): %v", model.Fields, requestedField)
+		}
+	}
 	return nil
 }
 
-func selectOne(serverConfig ServerConfig, model Model, primaryKey interface{}, requestedFields StringMap) (StringMap, error) {
+func selectOne(serverConfig ServerConfig, modelName string, model Model, primaryKey interface{}, requestedFields StringMap) (StringMap, error) {
 	// TODO: Mocking for now, remove
 	requestedFields = StringMap{
 		"id":      "ID",
@@ -47,7 +48,7 @@ func selectOne(serverConfig ServerConfig, model Model, primaryKey interface{}, r
 	}
 
 	// Apply linked data
-	err = applyLinks(data, serverConfig, model, requestedFields)
+	err = applyLinks(data, serverConfig, modelName, model, requestedFields)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +69,7 @@ func selectOneQuery(modelName string, model Model, serverConfig ServerConfig) *R
 			},
 		},
 		Resolver: func(args StringMap, fields StringMap) (StringMap, error) {
-			return selectOne(serverConfig, model, args[model.PrimaryKey], fields)
+			return selectOne(serverConfig, modelName, model, args[model.PrimaryKey], fields)
 		},
 	}
 }
