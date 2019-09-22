@@ -11,9 +11,9 @@ func main() {
 		Port:                8000,
 		Endpoint:            "/graphql",
 
-		Models: []a1.Model{
-			todoModel,
-			userModel,
+		Models: map[string]a1.Model{
+			"Todo": todoModel,
+			"User": userModel,
 		},
 		DatabaseDriver: cache.CreateDriver(cachedData),
 	}
@@ -22,49 +22,48 @@ func main() {
 
 // data
 
-var cachedData = map[string]map[interface{}]interface{}{
+var cachedData = map[string]map[interface{}]map[string]interface{}{
 	"todos": todos,
 	"users": users,
 }
 
-var todos = map[interface{}]interface{}{
-	1: map[interface{}]interface{}{
+var todos = map[interface{}]map[string]interface{}{
+	1: map[string]interface{}{
 		"id":      1,
 		"title":   "Todo 1",
 		"_userId": 1,
 	},
-	2: map[interface{}]interface{}{
+	2: map[string]interface{}{
 		"id":      2,
 		"title":   "Todo 2",
 		"_userId": 1,
 	},
-	3: map[interface{}]interface{}{
+	3: map[string]interface{}{
 		"id":      3,
 		"title":   "Todo 3",
 		"_userId": 2,
 	},
-	4: map[interface{}]interface{}{
+	4: map[string]interface{}{
 		"id":      4,
 		"title":   "Todo 4",
 		"_userId": -1,
 	},
 }
 
-var users = map[interface{}]interface{}{
-	1: map[interface{}]interface{}{
+var users = map[interface{}]map[string]interface{}{
+	1: map[string]interface{}{
 		"id":       1,
 		"username": "User1",
 	},
-	2: map[interface{}]interface{}{
-		"id":    2,
-		"title": "User2",
+	2: map[string]interface{}{
+		"id":       2,
+		"username": "User2",
 	},
 }
 
 // Models
 
 var todoModel = a1.Model{
-	Name:       "Todo",
 	Table:      "todos",
 	PrimaryKey: "id",
 	Fields: map[string]a1.Field{
@@ -75,22 +74,24 @@ var todoModel = a1.Model{
 			Type: "String",
 		},
 		"_userId": a1.Field{
-			Type: "User",
-			Linking: a1.FieldLink{
-				ForeignKey: "id",
-				Type:       a1.ManyToOne,
+			Type: "ID",
+			Linking: &a1.LinkedField{
+				AccessedAs:        "user",
+				ReverseAccessedAs: "todos",
+				ModelName:         "User",
+				ForeignKey:        "id",
+				Type:              a1.OneToMany,
 			},
 		},
 	},
 }
 
 var userModel = a1.Model{
-	Name:       "User",
 	Table:      "users",
 	PrimaryKey: "id",
 	Fields: map[string]a1.Field{
 		"id": a1.Field{
-			Type: "Int",
+			Type: "ID",
 		},
 		"username": a1.Field{
 			Type: "String",
