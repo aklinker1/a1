@@ -1,4 +1,5 @@
 #!/bin/bash
+EXAMPLE_DIR="TodoServerNew"
 
 function dim() {
     echo -en ""
@@ -39,18 +40,18 @@ function build() {
     set -e
     section "Build"
     bullet "Cleaning"
-    [ -f out/TodoServer ] && rm out/TodoServer
+    [ -f "out/$EXAMPLE_DIR" ] && rm "out/$EXAMPLE_DIR"
     bullet "Building"
-    go build -o out/TodoServer examples/TodoServer/main.go
+    go build -o "out/$EXAMPLE_DIR" "examples/$EXAMPLE_DIR/main.go" "examples/$EXAMPLE_DIR/models.go"
 }
 
 function run() {
     set -e
     section "Run"
-    bullet "Starting out/TodoApp"
+    bullet "Starting out/$EXAMPLE_DIR"
 
     reset
     printDimDivider
     echo ""
-    ./out/TodoServer
+    ./out/$EXAMPLE_DIR
 }
