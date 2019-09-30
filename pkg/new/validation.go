@@ -2,11 +2,12 @@ package new
 
 import (
 	"fmt"
+	"strings"
 )
 
 // Availability helpers for errors
 
-func availableDataLoaders(serverConfig FinalServerConfig) []string {
+func availableDataLoaders(serverConfig *FinalServerConfig) []string {
 	availableOptions := []string{}
 	for dataLoaderName := range serverConfig.DataLoaders {
 		availableOptions = append(availableOptions, dataLoaderName)
@@ -14,7 +15,7 @@ func availableDataLoaders(serverConfig FinalServerConfig) []string {
 	return availableOptions
 }
 
-func availableModels(serverConfig FinalServerConfig) []string {
+func availableModels(serverConfig *FinalServerConfig) []string {
 	availableOptions := []string{}
 	for modelName := range serverConfig.Models {
 		availableOptions = append(availableOptions, modelName)
@@ -22,7 +23,7 @@ func availableModels(serverConfig FinalServerConfig) []string {
 	return availableOptions
 }
 
-func availableTypes(serverConfig FinalServerConfig) []string {
+func availableTypes(serverConfig *FinalServerConfig) []string {
 	availableOptions := []string{}
 	for typeName := range serverConfig.Types {
 		availableOptions = append(availableOptions, typeName)
@@ -40,14 +41,25 @@ func availableFields(model *FinalModel) []string {
 
 // Validators
 
-func validateServerConfig(serverConfig FinalServerConfig) []error {
+func validateServerConfig(serverConfig *FinalServerConfig) []error {
 	errors := []error{}
+	// Basic Properties
+	port := serverConfig.Port
+	if port < 0 || port > 65535 {
+		errors = append(errors, fmt.Errorf("Port (%d) must be between 0 and 65535", port))
+	}
+	endpoint := serverConfig.Endpoint
+	if endpoint != "" && !strings.HasPrefix(endpoint, "/") {
+		errors = append(errors, fmt.Errorf("Endpoint (%s) must start with a '/'", endpoint))
+	}
+
+	// GraphQL
 	errors = append(errors, validateModels(serverConfig, serverConfig.Models)...)
-	// TODO validate data loaders
+	// TODO validate other stuff
 	return errors
 }
 
-func validateModels(serverConfig FinalServerConfig, models FinalModelMap) []error {
+func validateModels(serverConfig *FinalServerConfig, models FinalModelMap) []error {
 	errors := []error{}
 	for _, model := range models {
 		errors = append(errors, validateModelDataLoaderConfig(serverConfig, model, model.DataLoader)...)
@@ -56,10 +68,9 @@ func validateModels(serverConfig FinalServerConfig, models FinalModelMap) []erro
 	return errors
 }
 
-func validateModelDataLoaderConfig(serverConfig FinalServerConfig, model *FinalModel, dataLoaderConfig FinalDataLoaderConfig) []error {
+func validateModelDataLoaderConfig(serverConfig *FinalServerConfig, model *FinalModel, dataLoaderConfig FinalDataLoaderConfig) []error {
 	errors := []error{}
 	if dataLoaderConfig.DataLoader == nil {
-		fmt.Println("Model:", model.Name, "|", model.Extended, "|", len(model.Fields))
 		errors = append(errors, fmt.Errorf(
 			"ServerConfig.Models[%s].DataLoader.Source: Cannot find data loader named '%s' (Available options: %v)",
 			model.Name, dataLoaderConfig.Source, availableDataLoaders(serverConfig),
@@ -74,7 +85,7 @@ func validateModelDataLoaderConfig(serverConfig FinalServerConfig, model *FinalM
 	return errors
 }
 
-func validateModelFields(serverConfig FinalServerConfig, model *FinalModel, fields FinalFieldMap) []error {
+func validateModelFields(serverConfig *FinalServerConfig, model *FinalModel, fields FinalFieldMap) []error {
 	errors := []error{}
 	for fieldName, field := range fields {
 		switch field.(type) {

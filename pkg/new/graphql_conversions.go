@@ -7,23 +7,20 @@ import (
 // TYPES
 
 func getGraphqlTypes(types FinalCustomTypeMap) graphql.TypeMap {
-	output := graphql.TypeMap{
-		"String":  graphql.String,
-		"Int":     graphql.Int,
-		"Float":   graphql.Float,
-		"Boolean": graphql.Boolean,
-		"ID":      graphql.ID,
-		"Date":    graphql.DateTime,
-	}
+	output := graphql.TypeMap{}
 
 	for _, customType := range types {
-		output[customType.Name] = graphql.NewScalar(graphql.ScalarConfig{
-			Name:         customType.Name,
-			Description:  customType.Description,
-			Serialize:    customType.ToJSON,
-			ParseValue:   customType.FromJSON,
-			ParseLiteral: customType.FromLiteral,
-		})
+		if customType.GraphQLType != nil {
+			output[customType.Name] = customType.GraphQLType
+		} else {
+			output[customType.Name] = graphql.NewScalar(graphql.ScalarConfig{
+				Name:         customType.Name,
+				Description:  customType.Description,
+				Serialize:    customType.ToJSON,
+				ParseValue:   customType.FromJSON,
+				ParseLiteral: customType.FromLiteral,
+			})
+		}
 	}
 	return output
 }

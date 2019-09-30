@@ -16,6 +16,8 @@ func main() {
 		Models: models,
 		DataLoaders: a1.DataLoaderMap{
 			"PostgreSQL": cache.CreateDriver(cachedData),
+			"MongDB":     cache.CreateDriver(cachedData),
+			"Realm":      cache.CreateDriver(cachedData),
 		},
 	}
 	a1.Start(server)

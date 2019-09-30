@@ -71,8 +71,6 @@ func convertModelsToLinkedModels(types FinalCustomTypeMap, models ModelMap) Mode
 			if isLinkedField {
 				linkedModelName := linkedField.getCustomModelName(modelName)
 				linkedModel := models[linkedField.LinkedModel]
-				fmt.Println()
-				fmt.Println("Model:", linkedModelName)
 				linkedModels[linkedModelName] = Model{
 					Description: linkedModel.Description,
 					Extends:     linkedModel.Extends,
@@ -95,7 +93,6 @@ func removeFieldsForLink(fields FieldMap, fieldToRemove string) FieldMap {
 		linkedField, isLinkedField := field.(LinkedField)
 		if isLinkedField && linkedField.LinkedField == fieldToRemove {
 			delete(newFields, linkedFieldName)
-			fmt.Println("Removing Linked Field from child: ", linkedFieldName)
 		}
 	}
 	return newFields

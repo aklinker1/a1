@@ -2,6 +2,7 @@ package new
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	graphql "github.com/graphql-go/graphql"
@@ -318,4 +319,20 @@ type FinalServerConfig struct {
 	Models              FinalModelMap
 	DataLoaders         FinalDataLoaderMap
 	Types               FinalCustomTypeMap
+	Schema              graphql.Schema
+}
+
+type requestBody struct {
+	Query     string  `json:"query"`
+	Variables DataMap `json:"variables"`
+}
+
+type statusWriter struct {
+	http.ResponseWriter
+	status int
+}
+
+func (w *statusWriter) WriteHeader(code int) {
+	w.status = code
+	type ArgumentMap = DataMap
 }
