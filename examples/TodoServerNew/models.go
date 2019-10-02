@@ -208,7 +208,7 @@ var customTypes = a1.CustomTypeMap{
 
 var customEnums = a1.EnumMap{
 	"Theme": a1.Enum{
-		Description: "Whether not not the user has had their email validated",
+		Description: "The UI style of the application",
 		Values: a1.EnumValueMap{
 			"LIGHT": a1.EnumValue{
 				Value: 0,

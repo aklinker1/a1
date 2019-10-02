@@ -3,6 +3,7 @@ package new
 import (
 	"fmt"
 	"os"
+	"sort"
 
 	"github.com/aklinker1/a1/pkg/utils"
 	graphql "github.com/graphql-go/graphql"
@@ -42,8 +43,8 @@ func Start(serverConfig ServerConfig) {
 	utils.Log("")
 
 	// Parse Server Config
-	fmt.Print("  - Creating the \x1b[1m\x1b[95mGraphQL Schema\x1b[0m from your models")
-	finalServerconfig, errors := parseServerConfig(serverConfig)
+	fmt.Print("  - Parsing \x1b[1m\x1b[95mServerConfig\x1b[0m input")
+	finalServerConfig, errors := parseServerConfig(serverConfig)
 	if len(errors) > 0 {
 		fmt.Println(" \x1b[91m\x1b[1m(✘)\x1b[0m")
 		utils.Log("")
@@ -63,7 +64,7 @@ func Start(serverConfig ServerConfig) {
 
 	// Validate FinalServerConfig
 	fmt.Print("  - Validating the \x1b[1m\x1b[93mServerConfig\x1b[0m")
-	errors = validateServerConfig(finalServerconfig)
+	errors = validateServerConfig(finalServerConfig)
 	if len(errors) > 0 {
 		fmt.Println(" \x1b[91m\x1b[1m(✘)\x1b[0m")
 		fmt.Println()
@@ -81,8 +82,29 @@ func Start(serverConfig ServerConfig) {
 	fmt.Println(" \x1b[92m\x1b[1m(✔)\x1b[0m")
 	utils.Log("")
 
+	// Create the GraphQL Schema
+	fmt.Print("  - Creating the \x1b[1m\x1b[95mGraphQL Schema\x1b[0m from your models")
+	schema, err := createSchema(finalServerConfig)
+	if len(errors) > 0 {
+		fmt.Println(" \x1b[91m\x1b[1m(✘)\x1b[0m")
+		utils.Log("")
+		fmt.Printf("Failed to create GraphQL schema, errors:\n")
+		for _, err := range errors {
+			fmt.Println(err)
+		}
+		utils.Log("")
+		utils.Log("")
+		os.Exit(1)
+	}
+	finalServerConfig.GraphQLSchema = schema
+	if isVerbose {
+		fmt.Printf("    \x1b[92mCreated\x1b[92m")
+	}
+	fmt.Println(" \x1b[92m\x1b[1m(✔)\x1b[0m")
+	utils.Log("")
+
 	// Connect the data loaders
-	for _, dataLoader := range finalServerconfig.DataLoaders {
+	for _, dataLoader := range finalServerConfig.DataLoaders {
 		fmt.Printf("  - Connecting to \x1b[1m\x1b[94m%s\x1b[0m", dataLoader.Name)
 		err := dataLoader.Connect()
 		if err != nil {
@@ -105,11 +127,15 @@ func Start(serverConfig ServerConfig) {
 		fmt.Println()
 		return
 	}
-	startWebServer(finalServerconfig)
+	startWebServer(finalServerConfig)
 }
 
 func parseServerConfig(serverConfig ServerConfig) (*FinalServerConfig, []error) {
 	utils.Log("")
+	baseModelMap := ModelMap{}
+	for modelName, model := range serverConfig.Models {
+		baseModelMap[modelName] = model
+	}
 
 	// Get final data loaders
 	dataLoaders := FinalDataLoaderMap{}
@@ -142,11 +168,18 @@ func parseServerConfig(serverConfig ServerConfig) (*FinalServerConfig, []error) 
 	// Get Models (without linked fields)
 	models := FinalModelMap{}
 	for modelName, model := range serverConfig.Models {
-		models[modelName] = convertModelToFinalWithoutLinkedFields(dataLoaders, types, modelName, model)
+		model := convertModelToFinalWithoutLinkedFields(dataLoaders, types, modelName, model)
+		models[modelName] = model
 	}
 
 	// Copy model properties to extended models
 	extendModels(models)
+	baseModels := FinalModelMap{}
+	for modelName, model := range models {
+		if _, ok := baseModelMap[modelName]; ok {
+			baseModels[modelName] = model
+		}
+	}
 
 	// Append linked fields to models
 	fieldsToAppend := getLinkedFieldsToAppend(serverConfig.Models, models)
@@ -155,13 +188,16 @@ func parseServerConfig(serverConfig ServerConfig) (*FinalServerConfig, []error) 
 	}
 
 	// Models are setup
-	utils.LogWhite("[Final Models - %d]", len(models))
-	for _, model := range models {
-		fieldNames := []string{}
-		for fieldName := range model.Fields {
-			fieldNames = append(fieldNames, fieldName)
+	if utils.IsVerbose() {
+		utils.LogWhite("[Final Models - %d]", len(models))
+		for _, model := range models {
+			fieldNames := []string{}
+			for fieldName := range model.Fields {
+				fieldNames = append(fieldNames, fieldName)
+			}
+			sort.Strings(fieldNames)
+			utils.Log("  - %s %v", model.Name, fieldNames)
 		}
-		utils.Log("  - %s %v", model.Name, fieldNames)
 	}
 
 	// Get graphql types
@@ -171,51 +207,67 @@ func parseServerConfig(serverConfig ServerConfig) (*FinalServerConfig, []error) 
 		graphqlTypesArray = append(graphqlTypesArray, graphqlType)
 	}
 
-	// Create input model types
-	inputModels := inputModelsWithoutLinkedFields(graphqlTypes, models)
-	addLinksToInputObjects(inputModels, models)
-
 	// Create output model types
 	outputModels := outputModelsWithoutLinkedFields(graphqlTypes, models)
 	addLinksToOutputObjects(outputModels, models)
 
-	// Generate query resolvers
+	// Create input model types
+	inputModels := inputModelsWithoutLinkedFields(graphqlTypes, models)
+	addLinksToInputObjects(inputModels, models)
 
-	// Generate mutation resolvers
-
-	// Creat the schema
-	schema, err := graphql.NewSchema(graphql.SchemaConfig{
-		Query: graphql.NewObject(graphql.ObjectConfig{
-			Name: "RootQuery",
-			Fields: graphql.Fields{
-				"Test": nil,
-			},
-		}),
-		Mutation: graphql.NewObject(graphql.ObjectConfig{
-			Name: "RootMutation",
-			Fields: graphql.Fields{
-				"Test": nil,
-			},
-		}),
-		Types: graphqlTypesArray,
-	})
-	if err != nil {
-		return nil, []error{err}
+	// Combine Types
+	allTypes := graphql.TypeMap{}
+	for graphqlTypeName, graphqlType := range graphqlTypes {
+		allTypes[graphqlTypeName] = graphqlType
+	}
+	for inputTypeName, inputType := range inputModels {
+		allTypes[inputTypeName] = inputType
+	}
+	for outputTypeName, outputType := range outputModels {
+		allTypes[outputTypeName] = outputType
 	}
 
 	// Generate final server config
-	finalServerconfig := &FinalServerConfig{
+	finalServerConfig := &FinalServerConfig{
 		EnableIntrospection: serverConfig.EnableIntrospection,
 		Port:                serverConfig.Port,
 		Endpoint:            serverConfig.Endpoint,
 		Models:              models,
 		DataLoaders:         dataLoaders,
 		Types:               types,
-		Schema:              schema,
 	}
 
-	return finalServerconfig, nil
+	// Generate query resolvers
+	queryResolvables := []Resolvable{}
+	for _, model := range baseModels {
+		queryResolvables = append(queryResolvables, generateQueriesForModel(finalServerConfig, model)...)
+	}
+	queries := graphql.Fields{}
+	utils.LogWhite("[Queries - %d]", len(queryResolvables))
+	for _, query := range queryResolvables {
+		queries[query.Name] = query.graphqlResolverEntry(allTypes)
+		utils.Log("  - %s", query.Name)
+	}
+	finalServerConfig.GraphQLQueries = queries
+
+	// Generate mutation resolvers
+	finalServerConfig.GraphQLMutations = graphql.Fields{
+		"test": nil,
+	}
+
+	return finalServerConfig, nil
 }
 
-func pingDataLoaders(serverConfig ServerConfig) {
+func createSchema(serverConfig *FinalServerConfig) (graphql.Schema, error) {
+	return graphql.NewSchema(graphql.SchemaConfig{
+		Query: graphql.NewObject(graphql.ObjectConfig{
+			Name:   "RootQuery",
+			Fields: serverConfig.GraphQLQueries,
+		}),
+		Mutation: graphql.NewObject(graphql.ObjectConfig{
+			Name:   "RootMutation",
+			Fields: serverConfig.GraphQLMutations,
+		}),
+		Types: serverConfig.GraphqlTypes,
+	})
 }

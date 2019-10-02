@@ -1,6 +1,7 @@
 package new
 
 import (
+	utils "github.com/aklinker1/a1/pkg/utils"
 	graphql "github.com/graphql-go/graphql"
 )
 
@@ -31,8 +32,9 @@ func inputModelsWithoutLinkedFields(types graphql.TypeMap, models FinalModelMap)
 	inputs := map[string]*graphql.InputObject{}
 
 	for modelName, model := range models {
-		inputs[modelName] = graphql.NewInputObject(graphql.InputObjectConfig{
-			Name:        modelName,
+		name := "Input_" + modelName
+		inputs[name] = graphql.NewInputObject(graphql.InputObjectConfig{
+			Name:        name,
 			Description: model.Description,
 			Fields:      inputFieldsWithoutLinked(types, model.Fields),
 		})
@@ -102,19 +104,19 @@ func outputFieldsWithoutLinked(types graphql.TypeMap, fields FinalFieldMap) grap
 	outputFields := graphql.Fields{}
 	for fieldName, field := range fields {
 		switch field.(type) {
-		case Field:
-			regularField := field.(Field)
+		case *FinalField:
+			regularField := field.(*FinalField)
 			outputFields[fieldName] = &graphql.Field{
 				Name:              fieldName,
-				Type:              types[regularField.Type],
+				Type:              types[regularField.Type.Name],
 				Description:       regularField.Description,
 				DeprecationReason: regularField.DeprecationReason,
 			}
-		case VirtualField:
-			virtualField := field.(VirtualField)
+		case *FinalVirtualField:
+			virtualField := field.(*FinalVirtualField)
 			outputFields[fieldName] = &graphql.Field{
 				Name:              fieldName,
-				Type:              types[virtualField.Type],
+				Type:              types[virtualField.Type.Name],
 				Description:       virtualField.Description,
 				DeprecationReason: virtualField.DeprecationReason,
 			}
@@ -127,16 +129,91 @@ func addLinksToOutputObjects(outputs map[string]*graphql.Object, models FinalMod
 	var count int
 	for _, model := range models {
 		for _, field := range model.Fields {
-			linkedField, isLinkedField := field.(FinalLinkedField)
+			linkedField, isLinkedField := field.(*FinalLinkedField)
 			if isLinkedField {
 				outputs[model.Name].AddFieldConfig(linkedField.Name, &graphql.Field{
 					Name:              linkedField.Name,
 					DeprecationReason: linkedField.DeprecationReason,
-					Type:              outputs[model.Name],
+					Type:              outputs[linkedField.LinkedModelName],
 					Description:       linkedField.Description,
 				})
 				count++
 			}
 		}
+	}
+}
+
+func (resolver Resolvable) graphqlResolver() func(params graphql.ResolveParams) (interface{}, error) {
+	return func(params graphql.ResolveParams) (interface{}, error) {
+		utils.Log("\n  %s(args: %v)", resolver.Name, resolver.Arguments)
+		// Check Authorization
+		// myUser, err := middleware.Authorize(params.Context, function.AuthRequired)
+		// if err != nil {
+		// 	return 401, err
+		// }
+
+		// // Check Role Level
+		// if myUser != nil {
+		// 	err = middleware.CheckRole(myUser, function.MinRole)
+		// 	if err != nil {
+		// 		return 403, err
+		// 	}
+		// }
+
+		// Get argument map
+		args := params.Args
+
+		// Get field map
+		fields, err := utils.ParseRequestedFields(params)
+		utils.Log("Field Map: %v", fields)
+
+		// Call Resolver
+		result, err := resolver.Resolver(args, fields)
+		if err != nil {
+			return nil, err
+		}
+		resultMap, isMap := result.(DataMap)
+		if isMap {
+			utils.Log("Resolved JSON Object: %v", resultMap)
+			if len(resultMap) == 0 {
+				return nil, nil
+			}
+			return result, nil
+		}
+		resultArray, isArray := result.([]DataMap)
+		if isArray {
+			utils.Log("Resolved JSON Array[%d]: %v", len(resultArray), resultArray)
+			if len(resultArray) == 0 {
+				return []interface{}{}, nil
+			}
+			return resultArray, nil
+		}
+		return result, nil
+	}
+}
+
+func graphqlArguments(arguments []Argument, allTypes graphql.TypeMap) graphql.FieldConfigArgument {
+	config := graphql.FieldConfigArgument{}
+	for _, argument := range arguments {
+		config[argument.Name] = &graphql.ArgumentConfig{
+			Type:         allTypes[argument.Type],
+			DefaultValue: argument.DefaultValue,
+			Description:  argument.Description,
+		}
+	}
+	return config
+}
+
+func (resolver Resolvable) graphqlResolverEntry(allTypes graphql.TypeMap) *graphql.Field {
+	var returnType graphql.Output = allTypes[resolver.Model.Name]
+	if resolver.ResturnsList {
+		returnType = graphql.NewList(allTypes[resolver.Model.Name])
+	}
+	return &graphql.Field{
+		Name:        resolver.Name,
+		Description: resolver.Description,
+		Args:        graphqlArguments(resolver.Arguments, allTypes),
+		Type:        returnType,
+		Resolve:     resolver.graphqlResolver(),
 	}
 }

@@ -24,8 +24,8 @@ type RequestedFieldMap = map[string]interface{}
 // DataLoader -
 type DataLoader struct {
 	Connect     func() error
-	GetOne      func(model FinalModel, primaryKey interface{}, fields RequestedFieldMap) (DataMap, error)
-	GetMultiple func(model FinalModel, searchFields DataMap, fields RequestedFieldMap) ([]DataMap, error)
+	GetOne      func(model *FinalModel, primaryKey interface{}, fields RequestedFieldMap) (DataMap, error)
+	GetMultiple func(model *FinalModel, searchFields DataMap, fields RequestedFieldMap) ([]DataMap, error)
 }
 
 // DataLoaderMap -
@@ -35,8 +35,8 @@ type DataLoaderMap = map[string]DataLoader
 type FinalDataLoader struct {
 	Name        string
 	Connect     func() error
-	GetOne      func(model FinalModel, primaryKey interface{}, fields RequestedFieldMap) (DataMap, error)
-	GetMultiple func(model FinalModel, searchFields DataMap, fields RequestedFieldMap) ([]DataMap, error)
+	GetOne      func(model *FinalModel, primaryKey interface{}, fields RequestedFieldMap) (DataMap, error)
+	GetMultiple func(model *FinalModel, searchFields DataMap, fields RequestedFieldMap) ([]DataMap, error)
 }
 
 // FinalDataLoaderMap -
@@ -183,10 +183,10 @@ func (field LinkedField) getCustomModelName(parentModelName string) string {
 	if name == "" {
 		parentName := parentModelName
 		// Change "User.Preferences" to just "Preferences"
-		if strings.ContainsRune(parentName, '.') {
-			parentName = strings.Split(parentName, ".")[1]
+		if strings.Contains(parentName, ChildModelDeliminator) {
+			parentName = strings.Split(parentName, ChildModelDeliminator)[1]
 		}
-		name = fmt.Sprintf("%s.%s", parentName, field.LinkedModel)
+		name = fmt.Sprintf("%s_%s", parentName, field.LinkedModel)
 	}
 	return name
 }
@@ -214,11 +214,11 @@ type GraphQLConfig struct {
 
 // FinalGraphQLConfig -
 type FinalGraphQLConfig struct {
-	DisableSelectOne      bool
-	DisableSelectMultiple bool
-	DisableCreate         bool
-	DisableUpdate         bool
-	DisableDelete         bool
+	DisableGetOne      bool
+	DisableGetMultiple bool
+	DisableCreate      bool
+	DisableUpdate      bool
+	DisableDelete      bool
 }
 
 // Model -
@@ -319,7 +319,11 @@ type FinalServerConfig struct {
 	Models              FinalModelMap
 	DataLoaders         FinalDataLoaderMap
 	Types               FinalCustomTypeMap
-	Schema              graphql.Schema
+
+	GraphQLSchema    graphql.Schema
+	GraphQLQueries   graphql.Fields
+	GraphQLMutations graphql.Fields
+	GraphqlTypes     []graphql.Type
 }
 
 type requestBody struct {
@@ -335,4 +339,22 @@ type statusWriter struct {
 func (w *statusWriter) WriteHeader(code int) {
 	w.status = code
 	type ArgumentMap = DataMap
+}
+
+// Argument -
+type Argument struct {
+	Name         string
+	Description  string
+	Type         string
+	DefaultValue interface{}
+}
+
+// Resolvable -
+type Resolvable struct {
+	Name         string
+	Model        *FinalModel
+	Description  string
+	Arguments    []Argument
+	ResturnsList bool
+	Resolver     func(args DataMap, fields RequestedFieldMap) (interface{}, error)
 }

@@ -2,6 +2,7 @@ package new
 
 import (
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -62,6 +63,9 @@ func validateServerConfig(serverConfig *FinalServerConfig) []error {
 func validateModels(serverConfig *FinalServerConfig, models FinalModelMap) []error {
 	errors := []error{}
 	for _, model := range models {
+		if model.PrimaryKey == "" && model.GraphQL.DisableGetOne == false {
+			errors = append(errors, fmt.Errorf("Models[%s].PrimaryKey: Models must have a primary key, unless GraphQL.DisableGetOne is true", model.Name))
+		}
 		errors = append(errors, validateModelDataLoaderConfig(serverConfig, model, model.DataLoader)...)
 		errors = append(errors, validateModelFields(serverConfig, model, model.Fields)...)
 	}
@@ -135,4 +139,13 @@ func validateModelFields(serverConfig *FinalServerConfig, model *FinalModel, fie
 		}
 	}
 	return errors
+}
+
+func validateType(types FinalCustomTypeMap, typeName string) *FinalCustomType {
+	t, tExists := types[typeName]
+	if !tExists {
+		fmt.Printf("Type '%s' is not a type\n", typeName)
+		os.Exit(1)
+	}
+	return t
 }

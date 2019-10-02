@@ -188,11 +188,11 @@ func convertDataLoaderConfig(dataLoaders FinalDataLoaderMap, config DataLoaderCo
 
 func convertGraphQLConfig(config GraphQLConfig) FinalGraphQLConfig {
 	return FinalGraphQLConfig{
-		DisableSelectOne:      config.DisableSelectOne,
-		DisableSelectMultiple: config.DisableSelectMultiple,
-		DisableCreate:         config.DisableCreate,
-		DisableUpdate:         config.DisableUpdate,
-		DisableDelete:         config.DisableDelete,
+		DisableGetOne:      config.DisableSelectOne,
+		DisableGetMultiple: config.DisableSelectMultiple,
+		DisableCreate:      config.DisableCreate,
+		DisableUpdate:      config.DisableUpdate,
+		DisableDelete:      config.DisableDelete,
 	}
 }
 
@@ -200,12 +200,13 @@ func convertNonLinkedField(types FinalCustomTypeMap, fieldName string, field Gra
 	switch field.(type) {
 	case string:
 		typeName := field.(string)
+		finalType := validateType(types, typeName)
 		return &FinalField{
 			Name:              fieldName,
 			Description:       "",
 			DeprecationReason: "",
 			TypeName:          typeName,
-			Type:              types[typeName],
+			Type:              finalType,
 			Hidden:            false,
 			PrimaryKey:        false,
 			DataField:         fieldName,
@@ -216,24 +217,26 @@ func convertNonLinkedField(types FinalCustomTypeMap, fieldName string, field Gra
 		if regularField.DataField != "" {
 			dataFieldName = regularField.DataField
 		}
+		finalType := validateType(types, regularField.Type)
 		return &FinalField{
 			Name:              fieldName,
 			Description:       regularField.Description,
 			DeprecationReason: regularField.DeprecationReason,
 			TypeName:          regularField.Type,
-			Type:              types[regularField.Type],
+			Type:              finalType,
 			Hidden:            regularField.Hidden,
 			PrimaryKey:        regularField.PrimaryKey,
 			DataField:         dataFieldName,
 		}
 	case VirtualField:
 		virtualField := field.(VirtualField)
+		finalType := validateType(types, virtualField.Type)
 		return &FinalVirtualField{
 			Name:              fieldName,
 			Description:       virtualField.Description,
 			DeprecationReason: virtualField.DeprecationReason,
 			TypeName:          virtualField.Type,
-			Type:              types[virtualField.Type],
+			Type:              finalType,
 		}
 	}
 	return nil
@@ -261,4 +264,17 @@ func convertEnumValues(values EnumValueMap) graphql.EnumValueConfigMap {
 		}
 	}
 	return graphqlValues
+}
+
+func generateQueriesForModel(serverConfig *FinalServerConfig, model *FinalModel) []Resolvable {
+	results := []Resolvable{}
+	if !model.GraphQL.DisableGetOne {
+		results = append(results, GetOneQuery(serverConfig, model))
+	}
+	// results = append(results, GetMultipleQuery(serverConfig, model))
+	return results
+}
+
+func generateMutationsForModels(serverConfig *FinalServerConfig, model *FinalModel) []Resolvable {
+	return []Resolvable{}
 }

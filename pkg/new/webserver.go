@@ -63,10 +63,10 @@ func graphqlHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	ctx := context.WithValue(context.Background(), ContextKeyAuthHeader, req.Header.Get("authorization"))
+	ctx := context.WithValue(context.Background(), ContextKeyHeader, req.Header.Get("authorization"))
 
 	params := graphql.Params{
-		Schema:         serverConfig.Schema,
+		Schema:         serverConfig.GraphQLSchema,
 		RequestString:  request.Query,
 		Context:        ctx,
 		VariableValues: request.Variables,
