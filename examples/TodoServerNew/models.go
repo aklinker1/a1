@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	a1 "github.com/aklinker1/a1/pkg/new"
-	a1Types "github.com/aklinker1/a1/pkg/new/types"
+	a1 "github.com/aklinker1/a1/pkg"
+	a1Types "github.com/aklinker1/a1/pkg/types"
 )
 
 func postgreSQLTable(tableName string) a1.DataLoaderConfig {
@@ -71,8 +71,8 @@ var models = a1.ModelMap{
 			"lastName":   a1Types.String,
 
 			"fullName": a1.VirtualField{
-				Type:     a1Types.String,
-				Requires: []string{"firstName", "lastName"},
+				Type:           a1Types.String,
+				RequiredFields: []string{"firstName", "lastName"},
 				Compute: func(data map[string]interface{}) interface{} {
 					return fmt.Sprintf("%s %s", data["firstName"], data["lastName"])
 				},

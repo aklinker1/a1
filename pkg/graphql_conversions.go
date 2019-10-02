@@ -1,4 +1,4 @@
-package new
+package pkg
 
 import (
 	utils "github.com/aklinker1/a1/pkg/utils"
@@ -144,6 +144,7 @@ func addLinksToOutputObjects(outputs map[string]*graphql.Object, models FinalMod
 }
 
 func (resolver Resolvable) graphqlResolver() func(params graphql.ResolveParams) (interface{}, error) {
+	isVerbose := utils.IsVerbose()
 	return func(params graphql.ResolveParams) (interface{}, error) {
 		utils.Log("\n  %s(args: %v)", resolver.Name, resolver.Arguments)
 		// Check Authorization
@@ -164,8 +165,11 @@ func (resolver Resolvable) graphqlResolver() func(params graphql.ResolveParams) 
 		args := params.Args
 
 		// Get field map
-		fields, err := utils.ParseRequestedFields(params)
-		utils.Log("Field Map: %v", fields)
+		fields, err := GetRequestedFields(serverConfig, resolver.Model, params)
+		if isVerbose {
+			utils.Log("Field Map:")
+			printRequestedFields(fields, 2)
+		}
 
 		// Call Resolver
 		result, err := resolver.Resolver(args, fields)

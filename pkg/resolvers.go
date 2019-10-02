@@ -1,4 +1,4 @@
-package new
+package pkg
 
 import utils "github.com/aklinker1/a1/pkg/utils"
 

@@ -1,4 +1,4 @@
-package new
+package pkg
 
 import (
 	"fmt"
@@ -237,6 +237,7 @@ func convertNonLinkedField(types FinalCustomTypeMap, fieldName string, field Gra
 			DeprecationReason: virtualField.DeprecationReason,
 			TypeName:          virtualField.Type,
 			Type:              finalType,
+			RequiredFields:    virtualField.RequiredFields,
 		}
 	}
 	return nil

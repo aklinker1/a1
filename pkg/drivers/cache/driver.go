@@ -1,7 +1,7 @@
 package cache
 
 import (
-	a1 "github.com/aklinker1/a1/pkg/new"
+	a1 "github.com/aklinker1/a1/pkg"
 	utils "github.com/aklinker1/a1/pkg/utils"
 )
 
