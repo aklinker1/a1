@@ -98,7 +98,7 @@ func Start(serverConfig ServerConfig) {
 	}
 	finalServerConfig.GraphQLSchema = schema
 	if isVerbose {
-		fmt.Printf("    \x1b[92mCreated\x1b[92m")
+		fmt.Printf("\n    \x1b[92mCreated\x1b[92m")
 	}
 	fmt.Println(" \x1b[92m\x1b[1m(✔)\x1b[0m")
 	utils.Log("")
