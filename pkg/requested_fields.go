@@ -119,7 +119,7 @@ func printRequestedFields(requestedFields RequestedFieldMap, indentSpaces int) {
 	for fieldName, field := range requestedFields {
 		requiredString := ""
 		if field.WasRequired {
-			requiredString = "**"
+			requiredString = " *"
 		}
 		utils.Log("%s- %s%s", indent, fieldName, requiredString)
 		if field.InnerFields != nil {

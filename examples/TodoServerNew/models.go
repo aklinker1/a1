@@ -195,13 +195,13 @@ var models = a1.ModelMap{
 var customTypes = a1.CustomTypeMap{
 	"Email": a1.CustomType{
 		ToJSON: func(value interface{}) interface{} {
-			return ""
+			return value.(string)
 		},
 		FromJSON: func(value interface{}) interface{} {
-			return ""
+			return value.(string)
 		},
 		FromLiteral: func(value a1.ASTValue) interface{} {
-			return ""
+			return value.GetValue().(string)
 		},
 	},
 }
