@@ -103,21 +103,3 @@ import (
     a1 "github.com/aklinker1/a1/pkg"
 )
 ```
-
-## FAQ
-
-### 1. Is this an ORM?
-
-No, A1 does not do any database interaction. All database interactions go though the `DatabaseDriver`, while A1 simply tells the driver what it wants done. This also means that A1 does not handle database setup or teardown. You qwill have to create the tables and manage migrations.
-
-### 2. Can I still customize a `selectOne` query or any other queries where I don't want the default behavior?
-
-Of course! Check out [this page]() to find out how to override any default behaviors/
-
-### 3. Do you support subscriptions?
-
-As of now, no.
-
-## Documentation
-
-To checkout the full documentation and examples for getting started, checkout the [`docs/`]() folder.
