@@ -1,6 +1,6 @@
-# A1
+# <div style="background-image: url('https://user-images.githubusercontent.com/10101283/66178622-8f14d480-e62b-11e9-8db7-d18cc7885fb3.png'); height: 75px; background-position: center; background-repeat: no-repeat; background-size: contain"></div>
 
-A1 is a GraphQL framework written in Go. It is designed to remove tedious boilerplate code so that the only input it needs to spin up a server is a list of models and their relationships.
+A1 is a GraphQL framework written in Go. It is designed to remove boilerplate code by defining only the models returned by the API and their relationships. This makes setting up an entire API is easy.
 
 ## Getting Started
 
