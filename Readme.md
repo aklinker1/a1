@@ -1,6 +1,6 @@
 <img width="200" src="https://user-images.githubusercontent.com/10101283/66178622-8f14d480-e62b-11e9-8db7-d18cc7885fb3.png">
 
-A1 is a GraphQL framework written in Go. It is designed to remove boilerplate code by defining only the models returned by the API and their relationships. This makes setting up an entire API is easy.
+A1 is a GraphQL framework written in Go. It is designed to remove boilerplate code by defining only the models returned by the API and their relationships. This makes setting up an entire API a peice of cake.
 
 ## Basic Example
 
@@ -11,6 +11,7 @@ package example
 
 import (
     a1 "github.com/aklinker1/a1/pkg"
+    a1Types "github.com/aklinker1/a1/pkg/types"
     postgres "github.com/aklinker1/a1-postgresql/pkg"
 )
 
@@ -73,6 +74,8 @@ func main() {
     server := a1.ServerConfig{
         DataLoaders: dataLoaders,
         Models:      models,
+        Port:        8000,
+        Endpoint:    "/graphql",
     }
 }
 ```
@@ -81,9 +84,9 @@ And there you go! A fully functioning basic todo application GraphQL backend.
 
 > For a bit larger and more complex version, checkout the example [here](https://github.com/aklinker1/a1/tree/master/examples/TodoServer).
 
-## Setup
+## Installation and Usage
 
-You can either start from scratch by installing the library directly using `go get`, or you can clone a boilerplat prohject to get up and running faster.
+You can either start from scratch by installing the library directly using `go get`, or you can clone a boilerplate project to get up and running faster.
 
 ```bash
 # Install the library directly
@@ -93,39 +96,12 @@ go get github.com/aklinker1/a1
 git clone https://github.com/aklinker1/a1-boilerplate
 ```
 
-Then simply import the library and your driver of choice, define your models and server config, and call `Start`!
+Then to use the app, simply create a new `a1.ServerConfig` and then call `a1.Start(ServerConfig)` to start the server.
 
-```golang
+```go
 import (
-    framework "github.com/aklinker1/graphql-framework/pkg"
-    postgres "github.com/aklinker1/graphql-framework/pkg/drivers/postgres"
+    a1 "github.com/aklinker1/a1/pkg"
 )
-
-func main() {
-    server := framework.ServerConfig{
-        EnableIntrospection: true,
-        Port:                8000,
-        Endpoint:            "/graphql",
-
-        Models: []framework.Model{
-            framework.Model{
-                Name:       "Todo",
-                Table:      "todos",
-                PrimaryKey: "id",
-                Fields: map[string]framework.Field{
-                    "id": framework.Field{
-                        Type: "Int",
-                    },
-                    "title": framework.Field{
-                        Type: "String",
-                    },
-                },
-            },
-        },
-        DatabaseDriver: postgres.CreateDriver(),
-    }
-    server.Start()
-}
 ```
 
 ## FAQ
