@@ -2,6 +2,36 @@
 
 A1 is a GraphQL framework written in Go. It is designed to remove boilerplate code by defining only the models returned by the API and their relationships. This makes setting up an entire API a peice of cake.
 
+## Installation and Usage
+
+You can either start from scratch by installing the library directly using `go get`, or you can clone a boilerplate project to get up and running faster.
+
+```bash
+# Install the library directly
+go get github.com/aklinker1/a1
+
+# Clone a boilerplate project
+git clone https://github.com/aklinker1/a1-boilerplate
+```
+
+Then to use the framework, simply create a new `a1.ServerConfig` and then call `a1.Start(ServerConfig)` to start the server.
+
+```go
+import (
+    a1 "github.com/aklinker1/a1/pkg"
+)
+
+func main() {
+    server := a1.ServerConfig{
+        DataLoaders: a1.DataLoaderMap{ /* define data loaders */ },
+        Models:      a1.ModelMap{ /* define models loaders */ },
+        Port:        8000,
+        Endpoint:    "/graphql",
+    }
+    a1.Start(server)
+}
+```
+
 ## Basic Example
 
 A simple todo application with users and todos. This example includes all thre types of fields: `Field`, `VirtualField`, and `LinkedField`.
@@ -83,23 +113,3 @@ func main() {
 And there you go! A fully functioning basic todo application GraphQL backend.
 
 > For a bit larger and more complex version, checkout the example [here](https://github.com/aklinker1/a1/tree/master/examples/TodoServer).
-
-## Installation and Usage
-
-You can either start from scratch by installing the library directly using `go get`, or you can clone a boilerplate project to get up and running faster.
-
-```bash
-# Install the library directly
-go get github.com/aklinker1/a1
-
-# Clone a boilerplate project
-git clone https://github.com/aklinker1/a1-boilerplate
-```
-
-Then to use the app, simply create a new `a1.ServerConfig` and then call `a1.Start(ServerConfig)` to start the server.
-
-```go
-import (
-    a1 "github.com/aklinker1/a1/pkg"
-)
-```
