@@ -4,7 +4,7 @@
 <details>
 <summary>No...</summary>
 
-__A1 does not do any database interaction__. All database interactions go though a `DataLoader`, while A1 simply tells the driver what it wants done. This also means that A1 does not handle database setup or teardown. You qwill have to create the tables and manage migrations.
+__A1 does not do any database interaction__. All database interactions go though a `DataLoader`, while A1 simply tells the data loader what it wants done. This also means that A1 does not handle database setup or teardown. You will have to create the tables and manage migrations.
     
 </details>
 
