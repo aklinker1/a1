@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"strings"
 	"unicode"
@@ -31,6 +32,19 @@ func LowerFirstChar(str string) string {
 	return ""
 }
 
+// GetOutboundIP -
+func GetOutboundIP() (net.IP, error) {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+
+	return localAddr.IP, nil
+}
+
 // IsVerbose - Whether or not to print output
 func IsVerbose() bool {
 	return os.Getenv("VERBOSE") == "true"
@@ -40,5 +54,19 @@ func IsVerbose() bool {
 func Log(template string, args ...interface{}) {
 	if IsVerbose() {
 		fmt.Printf("    \x1b[2m%s\x1b[0m\n", fmt.Sprintf(template, args...))
+	}
+}
+
+// LogWhite -
+func LogWhite(template string, args ...interface{}) {
+	if IsVerbose() {
+		fmt.Printf("    %s\n", fmt.Sprintf(template, args...))
+	}
+}
+
+// LogRed -
+func LogRed(template string, args ...interface{}) {
+	if IsVerbose() {
+		fmt.Printf("    \x1b[91m%s\x1b[0m\n", fmt.Sprintf(template, args...))
 	}
 }
