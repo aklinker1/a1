@@ -16,7 +16,7 @@ __`a1` does not do any database interaction__. All database interactions go thou
 <details>
 <summary>Of course!</summary>
 
-Of course! Check out [this page]() to find out how to override any default behaviors.
+Check out [this page]() to find out how to override any default behaviors.
 
 </details>
 
@@ -27,6 +27,6 @@ Of course! Check out [this page]() to find out how to override any default behav
 <details>
 <summary>Nope.</summary>
 
-There is no support for it currently, and no interest in doing so in the future.
+There is no support for it currently, and no plans in doing so in the future as of now.
 
 </details>
