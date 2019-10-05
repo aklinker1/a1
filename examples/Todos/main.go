@@ -7,6 +7,8 @@ import (
 
 func main() {
 	server := a1.ServerConfig{
+		EnableIntrospection: true,
+
 		Types:  customTypes,
 		Enums:  customEnums,
 		Models: models,
