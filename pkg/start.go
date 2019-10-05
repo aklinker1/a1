@@ -114,10 +114,11 @@ func Start(serverConfig ServerConfig) {
 		err := dataLoader.Connect()
 		if err != nil {
 			fmt.Println(" \x1b[91m\x1b[1m(✘)\x1b[0m")
-			utils.Log("")
-			utils.LogRed("Failed to create connect to the database, error: %v", err)
-			utils.Log("")
-			utils.Log("")
+			fmt.Println("")
+			fmt.Print("      Failed to create connect to the database:\n")
+			fmt.Printf("      \x1b[91m%v\x1b[0m", err)
+			fmt.Println("")
+			fmt.Println("")
 			os.Exit(1)
 		}
 		if isVerbose {
@@ -169,7 +170,7 @@ func parseServerConfig(serverConfig ServerConfig) (*FinalServerConfig, []error) 
 
 	// Get final data loaders
 	dataLoaders := FinalDataLoaderMap{}
-	for dataLoaderName, dataLoader := range serverConfig.DataLoaders {
+	for dataLoaderName, dataLoader := range serverConfig.DataLoaders() {
 		finalDataLoader := convertDataLoader(dataLoaderName, dataLoader)
 		dataLoaders[dataLoaderName] = &finalDataLoader
 	}

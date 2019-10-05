@@ -1,78 +1,130 @@
 package pkg
 
-func getOneModel(serverConfig *FinalServerConfig, model *FinalModel, primaryKey interface{}, requestedFields RequestedFieldMap) (DataMap, error) {
+func getOneModel(
+	serverConfig *FinalServerConfig,
+	model *FinalModel,
+	args DataMap,
+	requestedFields RequestedFieldMap,
+) (DataMap, error) {
 	// Get data
-	data, err := model.DataLoader.DataLoader.GetOne(model, primaryKey, requestedFields)
+	dataLoaderData, err := model.DataLoader.DataLoader.GetOne(
+		model,
+		convertDataLoaderInput(model, args),
+		requestedFields,
+	)
+	data := convertDataLoaderOutput(model, dataLoaderData)
 	if err != nil {
 		return nil, err
 	}
 
-	// Apply linked data
-	// err = applyLinks(data, serverConfig, modelName, model, requestedFields)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	// Apply linked data & compute virtual fields
+	err = applyLinks(serverConfig, model, requestedFields, data)
+	if err != nil {
+		return nil, err
+	}
+	err = computeVirtualFields(serverConfig, model, requestedFields, data)
+	if err != nil {
+		return nil, err
+	}
 
 	return data, nil
 }
 
-// func selectMultiple(serverConfig FinalServerConfig, model FinalModel, args DataMap, requestedFields RequestedFieldMap) ([]DataMap, error) {
-// 	// Get data
-// 	items, err := serverConfig.DatabaseDriver.SelectMultiple(model, args, requestedFields)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+func getMultipleModels(
+	serverConfig *FinalServerConfig,
+	model *FinalModel,
+	args DataMap,
+	requestedFields RequestedFieldMap,
+) ([]DataMap, error) {
+	// Get data
+	dataLoaderItems, err := model.DataLoader.DataLoader.GetMultiple(
+		model,
+		convertDataLoaderInput(model, args),
+		requestedFields,
+	)
+	if err != nil {
+		return nil, err
+	}
 
-// 	// Apply linked data
-// 	for _, item := range items {
-// 		err = applyLinks(item, serverConfig, modelName, model, requestedFields)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 	}
+	items := make([]DataMap, len(dataLoaderItems))
+	for index, dataLoaderItem := range dataLoaderItems {
+		item := convertDataLoaderOutput(model, dataLoaderItem)
 
-// 	return items, nil
-// }
+		// Apply linked data & compute virtual fields
+		err = applyLinks(serverConfig, model, requestedFields, item)
+		if err != nil {
+			return nil, err
+		}
+		err = computeVirtualFields(serverConfig, model, requestedFields, item)
+		if err != nil {
+			return nil, err
+		}
 
-// func applyLinks(data DataMap, serverConfig FinalServerConfig, model FinalModel, requestedFields RequestedFieldMap) (err error) {
-// 	isAlreadyLinkedMap := map[string]*LinkedField{}
-// 	for fieldName, field := range model.Fields {
-// 		link := field.Linking
+		items[index] = item
+	}
 
-// 		if link != nil {
-// 			// If there is a linking object directly on the model
-// 			isAlreadyLinkedMap[link.AccessedAs] = link
-// 			requestedType, areRequestingLinkedField := requestedFields[link.AccessedAs]
-// 			nextRequestedFields, isRequestedFieldMap := requestedType.(DataMap)
-// 			if areRequestingLinkedField && isRequestedFieldMap {
-// 				utils.Log("Linking %s.%s by %s.%s=%v", modelName, link.AccessedAs, link.ModelName, fieldName, data[fieldName])
-// 				linkedValue, err := selectOne(serverConfig, link.ModelName, serverConfig.Models[link.ModelName], data[fieldName], nextRequestedFields)
-// 				if err != nil {
-// 					return err
-// 				}
-// 				if len(linkedValue) != 0 {
-// 					data[link.AccessedAs] = linkedValue
-// 				}
-// 			}
-// 		}
-// 	}
-// 	for requestedField := range requestedFields {
-// 		nextRequestedFields, isLinkedObject := requestedFields[requestedField].(DataMap)
-// 		_, modelHasRequestedField := model.Fields[requestedField]
-// 		_, isAlreadyLinked := isAlreadyLinkedMap[requestedField]
-// 		if isLinkedObject && !modelHasRequestedField && !isAlreadyLinked {
-// 			for nextModelName, nextModel := range serverConfig.Models {
-// 				for fieldName, field := range nextModel.Fields {
-// 					if field.Linking != nil && field.Linking.ReverseAccessedAs == requestedField {
-// 						link := field.Linking
-// 						utils.Log("Reverse linking %s.%s by %s.%s=%v", link.ModelName, requestedField, nextModelName, fieldName, data[link.ForeignKey])
-// 						searchArgs := map[string]interface{}{}
-// 						items, _ := selectMultiple(serverConfig, nextModelName, nextModel, searchArgs, nextRequestedFields)
-// 						data[requestedField] = items
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
-// 	return nil
-// }
+	return items, nil
+}
+
+func applyLinks(
+	serverConfig *FinalServerConfig,
+	model *FinalModel,
+	requestedFields RequestedFieldMap,
+	data DataMap,
+) (err error) {
+	for _, requestedField := range requestedFields {
+		if linkedField, ok := requestedField.Field.(*FinalLinkedField); ok {
+			nextRequestedFields := requestedFields[linkedField.Name].InnerFields.(RequestedFieldMap)
+			switch linkedField.Type {
+			case OneToOne:
+				fallthrough
+			case ManyToOne:
+				args := DataMap{
+					linkedField.LinkedField: data[linkedField.Field],
+				}
+				innerData, err := getOneModel(
+					serverConfig,
+					linkedField.LinkedModel,
+					args,
+					nextRequestedFields,
+				)
+				if err != nil {
+					return err
+				}
+				data[linkedField.Name] = innerData
+			case OneToMany:
+				args := DataMap{
+					linkedField.LinkedField: data[linkedField.Field],
+				}
+				innerData, err := getMultipleModels(
+					serverConfig,
+					linkedField.LinkedModel,
+					args,
+					nextRequestedFields,
+				)
+				if err != nil {
+					return err
+				}
+				data[linkedField.Name] = innerData
+			}
+		}
+	}
+	return nil
+}
+
+func computeVirtualFields(
+	serverConfig *FinalServerConfig,
+	model *FinalModel,
+	requestedFields RequestedFieldMap,
+	data DataMap,
+) (err error) {
+	for requestedFieldName, requestedField := range requestedFields {
+		if virtualField, ok := requestedField.Field.(*FinalVirtualField); ok {
+			data[requestedFieldName], err = virtualField.Compute(data)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}

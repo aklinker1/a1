@@ -135,12 +135,21 @@ func addLinksToOutputObjects(outputs map[string]*graphql.Object, models FinalMod
 		for _, field := range model.Fields {
 			linkedField, isLinkedField := field.(*FinalLinkedField)
 			if isLinkedField {
-				outputs[model.Name].AddFieldConfig(linkedField.Name, &graphql.Field{
-					Name:              linkedField.Name,
-					DeprecationReason: linkedField.DeprecationReason,
-					Type:              outputs[linkedField.LinkedModelName],
-					Description:       linkedField.Description,
-				})
+				if linkedField.Type == OneToMany {
+					outputs[model.Name].AddFieldConfig(linkedField.Name, &graphql.Field{
+						Name:              linkedField.Name,
+						DeprecationReason: linkedField.DeprecationReason,
+						Type:              graphql.NewList(outputs[linkedField.LinkedModelName]),
+						Description:       linkedField.Description,
+					})
+				} else {
+					outputs[model.Name].AddFieldConfig(linkedField.Name, &graphql.Field{
+						Name:              linkedField.Name,
+						DeprecationReason: linkedField.DeprecationReason,
+						Type:              outputs[linkedField.LinkedModelName],
+						Description:       linkedField.Description,
+					})
+				}
 				count++
 			}
 		}

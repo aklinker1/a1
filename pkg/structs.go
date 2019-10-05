@@ -12,6 +12,9 @@ import (
 // DataMap -
 type DataMap = map[string]interface{}
 
+// StringMap -
+type StringMap = map[string]string
+
 // RequestedField -
 type RequestedField struct {
 	Field       FinalGraphQLField
@@ -26,7 +29,7 @@ type RequestedFieldMap = map[string]RequestedField
 // DataLoader -
 type DataLoader struct {
 	Connect     func() error
-	GetOne      func(model *FinalModel, primaryKey interface{}, fields RequestedFieldMap) (DataMap, error)
+	GetOne      func(model *FinalModel, args DataMap, fields RequestedFieldMap) (DataMap, error)
 	GetMultiple func(model *FinalModel, searchFields DataMap, fields RequestedFieldMap) ([]DataMap, error)
 }
 
@@ -37,7 +40,7 @@ type DataLoaderMap = map[string]DataLoader
 type FinalDataLoader struct {
 	Name        string
 	Connect     func() error
-	GetOne      func(model *FinalModel, primaryKey interface{}, fields RequestedFieldMap) (DataMap, error)
+	GetOne      func(model *FinalModel, args DataMap, fields RequestedFieldMap) (DataMap, error)
 	GetMultiple func(model *FinalModel, searchFields DataMap, fields RequestedFieldMap) ([]DataMap, error)
 }
 
@@ -155,7 +158,7 @@ type VirtualField struct {
 	DeprecationReason string
 	Type              string
 	RequiredFields    []string
-	Compute           func(data DataMap) interface{}
+	Compute           func(data DataMap) (interface{}, error)
 }
 
 // FinalVirtualField -
@@ -166,7 +169,7 @@ type FinalVirtualField struct {
 	TypeName          string
 	Type              *FinalCustomType
 	RequiredFields    []string
-	Compute           func(data DataMap) interface{}
+	Compute           func(data DataMap) (interface{}, error)
 }
 
 // LinkedField -
@@ -242,6 +245,7 @@ type FinalModel struct {
 	Description string
 	DataLoader  FinalDataLoaderConfig
 	Fields      FinalFieldMap
+	DataFields  StringMap
 	GraphQL     FinalGraphQLConfig
 	PrimaryKey  string
 }
@@ -275,6 +279,14 @@ func (child FinalModel) extends(parent *FinalModel) *FinalModel {
 		fields[fieldName] = field
 	}
 
+	// Data Fields
+	dataFields := StringMap{}
+	for fieldName, field := range fields {
+		if regularField, isRegularField := field.(*FinalField); isRegularField {
+			dataFields[regularField.DataField] = fieldName
+		}
+	}
+
 	// Basic details
 	name := parent.Name
 	if child.Name != "" {
@@ -294,6 +306,7 @@ func (child FinalModel) extends(parent *FinalModel) *FinalModel {
 		Description: description,
 		DataLoader:  dataLoaderConfig,
 		Fields:      fields,
+		DataFields:  dataFields,
 		GraphQL:     child.GraphQL,
 		PrimaryKey:  primaryKey,
 	}
@@ -308,7 +321,7 @@ type ServerConfig struct {
 	Port                int
 	Endpoint            string
 	Models              ModelMap
-	DataLoaders         DataLoaderMap
+	DataLoaders         func() DataLoaderMap
 	Types               CustomTypeMap
 	Enums               EnumMap
 }

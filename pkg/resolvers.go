@@ -14,19 +14,19 @@ func GetOneQuery(serverConfig *FinalServerConfig, model *FinalModel) Resolvable 
 			},
 		},
 		Resolver: func(args DataMap, requestedFields RequestedFieldMap) (interface{}, error) {
-			return getOneModel(serverConfig, model, args[model.PrimaryKey], requestedFields)
+			return getOneModel(serverConfig, model, args, requestedFields)
 		},
 	}
 }
 
 // GetMultipleQuery -
-// func GetMultipleQuery(model Model, serverConfig FinalServerConfig) Resolvable {
-// 	return Resolvable{
-// 		Name:         "list" + utils.AddS(utils.LowerFirstChar(modelName)),
-// 		Model:        model,
-// 		ResturnsList: true,
-// 		Resolver: func(args DataMap, requestedFields RequestedFieldMap) (interface{}, error) {
-// 			return selectMultiple(serverConfig, modelName, model, args, requestedFields)
-// 		},
-// 	}
-// }
+func GetMultipleQuery(serverConfig *FinalServerConfig, model *FinalModel) Resolvable {
+	return Resolvable{
+		Name:         "list" + utils.AddS(model.Name),
+		Model:        model,
+		ResturnsList: true,
+		Resolver: func(args DataMap, requestedFields RequestedFieldMap) (interface{}, error) {
+			return getMultipleModels(serverConfig, model, args, requestedFields)
+		},
+	}
+}
