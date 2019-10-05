@@ -1,5 +1,5 @@
 #!/bin/bash
-EXAMPLE_DIR="TodoServerNew"
+EXAMPLE_DIR="Todos"
 
 function dim() {
     echo -en ""
