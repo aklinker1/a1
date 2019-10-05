@@ -53,5 +53,5 @@ function run() {
     reset
     printDimDivider
     echo ""
-    ./out/$EXAMPLE_DIR
+    ENV_FILE="examples/$EXAMPLE_DIR/.env" ./out/$EXAMPLE_DIR
 }

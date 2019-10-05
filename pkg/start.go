@@ -16,8 +16,8 @@ func Start(serverConfig ServerConfig) {
 	utils.Log("")
 
 	// Load ENV Variables
-	fmt.Print("  - Loading \x1b[1m\x1b[96mEnvironment Vairables\x1b[0m from \x1b[3m.env\x1b[0m")
 	envFile := os.Getenv("ENV_FILE")
+	fmt.Printf("  - Loading \x1b[1m\x1b[96mEnvironment Vairables\x1b[0m from \x1b[3m%s\x1b[0m", envFile)
 	if envFile == "" {
 		envFile = ".env"
 	}
@@ -35,14 +35,15 @@ func Start(serverConfig ServerConfig) {
 	if err != nil {
 		fmt.Println(" \x1b[91m\x1b[1m(✘)\x1b[0m")
 		utils.Log("")
-		fmt.Printf("        Error loading '%s': %v\n\n", envFile, err)
+		fmt.Printf("      Error loading '%s':\n", envFile)
+		fmt.Printf("      \x1b[91m%v\x1b[0m\n\n", err)
 	} else {
 		fmt.Println(" \x1b[92m\x1b[1m(✔)\x1b[0m")
 	}
 	utils.Log("")
 
 	// Parse Server Config
-	fmt.Print("  - Parsing \x1b[1m\x1b[95mServerConfig\x1b[0m input")
+	fmt.Print("  - Parsing \x1b[1m\x1b[93mServerConfig\x1b[0m input")
 	finalServerConfig, errors := parseServerConfig(serverConfig)
 	if len(errors) > 0 {
 		fmt.Println(" \x1b[91m\x1b[1m(✘)\x1b[0m")

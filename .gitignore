@@ -1,4 +1,11 @@
-.env
+# Dep
+#
 vendor/
+
+# Editors
+#
 .vscode/
+
+# Build Artifacts
+#
 out/
