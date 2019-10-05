@@ -2,8 +2,11 @@ package pkg
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
+	"regexp"
 	"sort"
+	"strings"
 
 	"github.com/aklinker1/a1/pkg/utils"
 	graphql "github.com/graphql-go/graphql"
@@ -25,11 +28,13 @@ func Start(serverConfig ServerConfig) {
 	isVerbose := utils.IsVerbose()
 	if isVerbose {
 		utils.Log("")
-		utils.LogWhite("[Environment]")
+		utils.LogWhite("[a1 Environment]")
 		utils.Log("  - ENV_FILE: %s", envFile)
 		utils.Log("  - DEV: %t", os.Getenv("DEV") == "true")
 		utils.Log("  - VERBOSE: %t", isVerbose)
 		utils.Log("  - STARTUP_ONLY: %t", os.Getenv("STARTUP_ONLY") == "true")
+		utils.LogWhite("[Custom Environment]")
+		printOtherENV(envFile)
 		fmt.Printf("    \x1b[92mLoaded\x1b[92m")
 	}
 	if err != nil {
@@ -128,6 +133,31 @@ func Start(serverConfig ServerConfig) {
 		return
 	}
 	startWebServer(finalServerConfig)
+}
+
+func printOtherENV(envFile string) {
+	bytes, _ := ioutil.ReadFile(envFile)
+	fileContent := string(bytes)
+	lines := strings.Split(fileContent, "\n")
+	ignoredKeys := []string{"DEV", "VERBOSE", "STARTUP_ONLY"}
+	re := regexp.MustCompile(`(?m)(.*)=(.*)`)
+
+	for _, line := range lines {
+		isIgnored := false
+		for _, ignoredKey := range ignoredKeys {
+			if strings.HasPrefix(line, ignoredKey) {
+				isIgnored = true
+			}
+		}
+		if !isIgnored {
+			matches := re.FindStringSubmatch(line)
+			if len(matches) > 0 {
+				key := matches[1]
+				value := matches[2]
+				utils.Log("  - %s: %s", key, value)
+			}
+		}
+	}
 }
 
 func parseServerConfig(serverConfig ServerConfig) (*FinalServerConfig, []error) {
