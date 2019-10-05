@@ -15,8 +15,8 @@ func main() {
 		Enums:  customEnums,
 		Models: models,
 		DataLoaders: a1.DataLoaderMap{
-			"PostgreSQL": cache.CreateDriver(cachedData),
-			"MongoDB":    cache.CreateDriver(cachedData),
+			"PostgreSQL": cache.CreateDataLoader(cachedData),
+			"MongoDB":    cache.CreateDataLoader(cachedData),
 		},
 	}
 	a1.Start(server)

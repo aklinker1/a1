@@ -5,8 +5,8 @@ import (
 	utils "github.com/aklinker1/a1/pkg/utils"
 )
 
-// CreateDriver -
-func CreateDriver(localData map[string]map[interface{}]map[string]interface{}) a1.DataLoader {
+// CreateDataLoader -
+func CreateDataLoader(localData map[string]map[interface{}]map[string]interface{}) a1.DataLoader {
 	return a1.DataLoader{
 		Connect: func() error {
 			return nil
