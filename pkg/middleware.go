@@ -28,7 +28,7 @@ func requestLogger(next http.Handler) http.Handler {
 				statusRes.status = 200
 			}
 			message := fmt.Sprintf(
-				"  \x1b[%sm[%s] %s %s (%s ms) %d\x1b[0m",
+				"\x1b[%sm[%s] %s %s (%s ms) %d\x1b[0m",
 				color,
 				req.RemoteAddr,
 				req.Method,

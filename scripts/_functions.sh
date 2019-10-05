@@ -46,7 +46,8 @@ function build() {
         "examples/$EXAMPLE_DIR/main.go" \
         "examples/$EXAMPLE_DIR/models.go" \
         "examples/$EXAMPLE_DIR/types.go" \
-        "examples/$EXAMPLE_DIR/cache_data.go"
+        "examples/$EXAMPLE_DIR/cache_data.go" \
+        "examples/$EXAMPLE_DIR/data_loaders.go"
 }
 
 function run() {

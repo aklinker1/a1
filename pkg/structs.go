@@ -158,7 +158,7 @@ type VirtualField struct {
 	DeprecationReason string
 	Type              string
 	RequiredFields    []string
-	Compute           func(data DataMap) interface{}
+	Compute           func(data DataMap) (interface{}, error)
 }
 
 // FinalVirtualField -
@@ -169,7 +169,7 @@ type FinalVirtualField struct {
 	TypeName          string
 	Type              *FinalCustomType
 	RequiredFields    []string
-	Compute           func(data DataMap) interface{}
+	Compute           func(data DataMap) (interface{}, error)
 }
 
 // LinkedField -
@@ -321,7 +321,7 @@ type ServerConfig struct {
 	Port                int
 	Endpoint            string
 	Models              ModelMap
-	DataLoaders         DataLoaderMap
+	DataLoaders         func() DataLoaderMap
 	Types               CustomTypeMap
 	Enums               EnumMap
 }

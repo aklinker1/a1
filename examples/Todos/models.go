@@ -24,8 +24,9 @@ var models = a1.ModelMap{
 		},
 		Fields: a1.FieldMap{
 			"_id": a1.Field{
-				Type:       a1Types.ID,
+				Type:       a1Types.String,
 				PrimaryKey: true,
+				DataField:  "id",
 			},
 			"username": a1Types.String,
 			"email": a1.Field{
@@ -56,8 +57,8 @@ var models = a1.ModelMap{
 			"fullName": a1.VirtualField{
 				Type:           a1Types.String,
 				RequiredFields: []string{"firstName", "lastName"},
-				Compute: func(data map[string]interface{}) interface{} {
-					return fmt.Sprintf("%s %s", data["firstName"], data["lastName"])
+				Compute: func(data map[string]interface{}) (interface{}, error) {
+					return fmt.Sprintf("%s %s", data["firstName"], data["lastName"]), nil
 				},
 			},
 
@@ -84,8 +85,9 @@ var models = a1.ModelMap{
 		},
 		Fields: a1.FieldMap{
 			"_id": a1.Field{
-				Type:       a1Types.ID,
+				Type:       a1Types.String,
 				PrimaryKey: true,
+				DataField:  "id",
 			},
 			"_userId": a1.Field{
 				Type:      a1Types.ID,
@@ -105,8 +107,9 @@ var models = a1.ModelMap{
 		DataLoader: postgreSQLTable("todos"),
 		Fields: a1.FieldMap{
 			"_id": a1.Field{
-				Type:       a1Types.ID,
+				Type:       a1Types.String,
 				PrimaryKey: true,
+				DataField:  "id",
 			},
 			"_userId": a1.Field{
 				Type:      a1Types.ID,
@@ -138,8 +141,8 @@ var models = a1.ModelMap{
 			"_name": a1.Field{
 				Type:       a1Types.String,
 				PrimaryKey: true,
+				DataField:  "name",
 			},
-			"addedAt": a1Types.Date,
 
 			"todoTags": a1.LinkedField{
 				LinkedModel: "TodoTag",
@@ -162,6 +165,7 @@ var models = a1.ModelMap{
 			"_id": a1.Field{
 				Type:       a1Types.String,
 				PrimaryKey: true,
+				DataField:  "id",
 			},
 			"_todoId": a1.Field{
 				Type:      a1Types.String,
@@ -171,6 +175,7 @@ var models = a1.ModelMap{
 				Type:      a1Types.String,
 				DataField: "tag_name",
 			},
+			"addedAt": a1Types.Date,
 
 			"tag": a1.LinkedField{
 				LinkedModel: "Tag",

@@ -245,6 +245,7 @@ func convertNonLinkedField(types FinalCustomTypeMap, fieldName string, field Gra
 			TypeName:          virtualField.Type,
 			Type:              finalType,
 			RequiredFields:    virtualField.RequiredFields,
+			Compute:           virtualField.Compute,
 		}
 	}
 	return nil
