@@ -30,7 +30,11 @@ func startWebServer(finalServerConfig *FinalServerConfig) {
 	if isDev {
 		endpoint := fmt.Sprintf("%d%s", port, endpoint)
 		outboundIP, ipError := utils.GetOutboundIP()
-		fmt.Println("  - Starting the \x1b[1mWeb Server\x1b[0m \x1b[92m\x1b[1m(✔)\x1b[0m")
+		fmt.Printf("  - Starting the \x1b[1mWeb Server\x1b[0m")
+		if utils.IsVerbose() {
+			fmt.Printf("\n    \x1b[92mStarted\x1b[92m")
+		}
+		fmt.Println(" \x1b[92m\x1b[1m(✔)\x1b[0m")
 		fmt.Println()
 		fmt.Println("\x1b[1mServer started at:\x1b[0m")
 		fmt.Printf("  - Device:  \x1b[4mhttp://localhost:%s\x1b[0m\n", endpoint)

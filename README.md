@@ -112,7 +112,7 @@ func main() {
 
 And there you go! A fully functioning basic todo application GraphQL backend.
 
-> For a bit larger and more complex version, checkout the example [here](https://github.com/aklinker1/a1/tree/master/examples/TodoServer).
+> For a bit larger and more complex version, checkout the example [here](https://github.com/aklinker1/a1/tree/master/examples/Todos).
 
 ## Documentation
 
