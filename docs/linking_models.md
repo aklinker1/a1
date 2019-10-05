@@ -1,4 +1,4 @@
-# Linking Models
+# <img height="25" src="https://user-images.githubusercontent.com/10101283/66178622-8f14d480-e62b-11e9-8db7-d18cc7885fb3.png"> &ensp; Linking Models
 
 Linking models are how relationships are defined in A1. This page will walk you though the basics of defining a `LinkedField`.
 

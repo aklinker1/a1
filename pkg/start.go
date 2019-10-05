@@ -2,8 +2,11 @@ package pkg
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
+	"regexp"
 	"sort"
+	"strings"
 
 	"github.com/aklinker1/a1/pkg/utils"
 	graphql "github.com/graphql-go/graphql"
@@ -16,8 +19,8 @@ func Start(serverConfig ServerConfig) {
 	utils.Log("")
 
 	// Load ENV Variables
-	fmt.Print("  - Loading \x1b[1m\x1b[96mEnvironment Vairables\x1b[0m from \x1b[3m.env\x1b[0m")
 	envFile := os.Getenv("ENV_FILE")
+	fmt.Printf("  - Loading \x1b[1m\x1b[96mEnvironment Vairables\x1b[0m from \x1b[3m%s\x1b[0m", envFile)
 	if envFile == "" {
 		envFile = ".env"
 	}
@@ -25,24 +28,27 @@ func Start(serverConfig ServerConfig) {
 	isVerbose := utils.IsVerbose()
 	if isVerbose {
 		utils.Log("")
-		utils.LogWhite("[Environment]")
+		utils.LogWhite("[a1 Environment]")
 		utils.Log("  - ENV_FILE: %s", envFile)
 		utils.Log("  - DEV: %t", os.Getenv("DEV") == "true")
 		utils.Log("  - VERBOSE: %t", isVerbose)
 		utils.Log("  - STARTUP_ONLY: %t", os.Getenv("STARTUP_ONLY") == "true")
+		utils.LogWhite("[Custom Environment]")
+		printOtherENV(envFile)
 		fmt.Printf("    \x1b[92mLoaded\x1b[92m")
 	}
 	if err != nil {
 		fmt.Println(" \x1b[91m\x1b[1m(✘)\x1b[0m")
 		utils.Log("")
-		fmt.Printf("        Error loading '%s': %v\n\n", envFile, err)
+		fmt.Printf("      Error loading '%s':\n", envFile)
+		fmt.Printf("      \x1b[91m%v\x1b[0m\n\n", err)
 	} else {
 		fmt.Println(" \x1b[92m\x1b[1m(✔)\x1b[0m")
 	}
 	utils.Log("")
 
 	// Parse Server Config
-	fmt.Print("  - Parsing \x1b[1m\x1b[95mServerConfig\x1b[0m input")
+	fmt.Print("  - Parsing \x1b[1m\x1b[93mServerConfig\x1b[0m input")
 	finalServerConfig, errors := parseServerConfig(serverConfig)
 	if len(errors) > 0 {
 		fmt.Println(" \x1b[91m\x1b[1m(✘)\x1b[0m")
@@ -127,6 +133,31 @@ func Start(serverConfig ServerConfig) {
 		return
 	}
 	startWebServer(finalServerConfig)
+}
+
+func printOtherENV(envFile string) {
+	bytes, _ := ioutil.ReadFile(envFile)
+	fileContent := string(bytes)
+	lines := strings.Split(fileContent, "\n")
+	ignoredKeys := []string{"DEV", "VERBOSE", "STARTUP_ONLY"}
+	re := regexp.MustCompile(`(?m)(.*)=(.*)`)
+
+	for _, line := range lines {
+		isIgnored := false
+		for _, ignoredKey := range ignoredKeys {
+			if strings.HasPrefix(line, ignoredKey) {
+				isIgnored = true
+			}
+		}
+		if !isIgnored {
+			matches := re.FindStringSubmatch(line)
+			if len(matches) > 0 {
+				key := matches[1]
+				value := matches[2]
+				utils.Log("  - %s: %s", key, value)
+			}
+		}
+	}
 }
 
 func parseServerConfig(serverConfig ServerConfig) (*FinalServerConfig, []error) {

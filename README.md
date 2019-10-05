@@ -23,10 +23,9 @@ import (
 
 func main() {
     server := a1.ServerConfig{
-        DataLoaders: a1.DataLoaderMap{ /* define data loaders */ },
-        Models:      a1.ModelMap{ /* define models */ },
-        Port:        8000,
-        Endpoint:    "/graphql",
+        DataLoaders:         a1.DataLoaderMap{ /* define data loaders */ },
+        Models:              a1.ModelMap{ /* define models */ },
+        EnableIntrospection: true
     }
     a1.Start(server)
 }

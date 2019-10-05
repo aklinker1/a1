@@ -8,8 +8,6 @@ import (
 func main() {
 	server := a1.ServerConfig{
 		EnableIntrospection: true,
-		Port:                8000,
-		Endpoint:            "/graphql",
 
 		Types:  customTypes,
 		Enums:  customEnums,

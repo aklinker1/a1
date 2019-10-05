@@ -1,6 +1,7 @@
-<img width="200" src="https://user-images.githubusercontent.com/10101283/66178622-8f14d480-e62b-11e9-8db7-d18cc7885fb3.png"> &emsp;__FAQ__
+# <img height="25" src="https://user-images.githubusercontent.com/10101283/66178622-8f14d480-e62b-11e9-8db7-d18cc7885fb3.png"> &ensp;FAQ
 
 ## 1. Is this an ORM?
+
 <details>
 <summary>No...</summary>
 

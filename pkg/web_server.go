@@ -28,18 +28,22 @@ func startWebServer(finalServerConfig *FinalServerConfig) {
 	http.Handle(endpoint, requestLogger(methodFilter(allowCors(handler))))
 
 	if isDev {
-		endpoint := fmt.Sprintf("%d%s", port, endpoint)
 		outboundIP, ipError := utils.GetOutboundIP()
 		fmt.Printf("  - Starting the \x1b[1mWeb Server\x1b[0m")
 		if utils.IsVerbose() {
-			fmt.Printf("\n    \x1b[92mStarted\x1b[92m")
+			utils.Log("")
+			utils.LogWhite("[Server Config]")
+			utils.Log("  - Introspection: %t", finalServerConfig.EnableIntrospection)
+			utils.Log("  - Endpoint:      %s", endpoint)
+			utils.Log("  - Port:          %d", port)
+			fmt.Printf("    \x1b[92mStarted\x1b[92m")
 		}
 		fmt.Println(" \x1b[92m\x1b[1m(✔)\x1b[0m")
 		fmt.Println()
 		fmt.Println("\x1b[1mServer started at:\x1b[0m")
-		fmt.Printf("  - Device:  \x1b[4mhttp://localhost:%s\x1b[0m\n", endpoint)
+		fmt.Printf("  - Device:  \x1b[4mhttp://localhost:%d%s\x1b[0m\n", port, endpoint)
 		if ipError == nil {
-			fmt.Printf("  - Network: \x1b[4mhttp://%s:%s\x1b[0m\n", outboundIP, endpoint)
+			fmt.Printf("  - Network: \x1b[4mhttp://%s:%d%s\x1b[0m\n", outboundIP, port, endpoint)
 		}
 	}
 
