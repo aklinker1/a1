@@ -49,11 +49,13 @@ func inputFieldsWithoutLinked(types graphql.TypeMap, fields FinalFieldMap) graph
 		switch field.(type) {
 		case Field:
 			regularField := field.(Field)
-			inputFields[fieldName] = &graphql.Field{
-				Name:              fieldName,
-				Type:              types[regularField.Type],
-				Description:       regularField.Description,
-				DeprecationReason: regularField.DeprecationReason,
+			if !regularField.Hidden {
+				inputFields[fieldName] = &graphql.Field{
+					Name:              fieldName,
+					Type:              types[regularField.Type],
+					Description:       regularField.Description,
+					DeprecationReason: regularField.DeprecationReason,
+				}
 			}
 		case VirtualField:
 			virtualField := field.(VirtualField)
@@ -106,11 +108,13 @@ func outputFieldsWithoutLinked(types graphql.TypeMap, fields FinalFieldMap) grap
 		switch field.(type) {
 		case *FinalField:
 			regularField := field.(*FinalField)
-			outputFields[fieldName] = &graphql.Field{
-				Name:              fieldName,
-				Type:              types[regularField.Type.Name],
-				Description:       regularField.Description,
-				DeprecationReason: regularField.DeprecationReason,
+			if !regularField.Hidden {
+				outputFields[fieldName] = &graphql.Field{
+					Name:              fieldName,
+					Type:              types[regularField.Type.Name],
+					Description:       regularField.Description,
+					DeprecationReason: regularField.DeprecationReason,
+				}
 			}
 		case *FinalVirtualField:
 			virtualField := field.(*FinalVirtualField)

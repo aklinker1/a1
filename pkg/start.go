@@ -12,11 +12,10 @@ import (
 
 // Start -
 func Start(serverConfig ServerConfig) {
-	// Load ENV Variables
 	fmt.Println("\x1b[1mStarting Server:\x1b[0m")
 	utils.Log("")
 
-	// Load env variables
+	// Load ENV Variables
 	fmt.Print("  - Loading \x1b[1m\x1b[96mEnvironment Vairables\x1b[0m from \x1b[3m.env\x1b[0m")
 	envFile := os.Getenv("ENV_FILE")
 	if envFile == "" {
