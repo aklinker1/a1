@@ -126,11 +126,16 @@ func getLinkedFieldsToAppend(models ModelMap, allModels FinalModelMap) []linkedF
 
 func convertModelToFinalWithoutLinkedFields(dataLoaders FinalDataLoaderMap, types FinalCustomTypeMap, modelName string, model Model) *FinalModel {
 	fields := FinalFieldMap{}
+	dataFields := StringMap{}
 	var primaryKey string
 	primaryKeyCount := 0
 	for fieldName, field := range model.Fields {
 		if _, isLinkedField := field.(LinkedField); !isLinkedField {
-			fields[fieldName] = convertNonLinkedField(types, fieldName, field)
+			nonLinkedField := convertNonLinkedField(types, fieldName, field)
+			fields[fieldName] = nonLinkedField
+			if regularField, isRegularField := nonLinkedField.(*FinalField); isRegularField {
+				dataFields[regularField.DataField] = fieldName
+			}
 		}
 		if regularField, isRegularField := field.(Field); isRegularField && regularField.PrimaryKey {
 			primaryKeyCount++
@@ -147,6 +152,7 @@ func convertModelToFinalWithoutLinkedFields(dataLoaders FinalDataLoaderMap, type
 		Description: model.Description,
 		DataLoader:  convertDataLoaderConfig(dataLoaders, model.DataLoader),
 		Fields:      fields,
+		DataFields:  dataFields,
 		GraphQL:     convertGraphQLConfig(model.GraphQL),
 		PrimaryKey:  primaryKey,
 	}
@@ -173,6 +179,7 @@ func convertLinkedField(models FinalModelMap, fieldName string, field LinkedFiel
 		DeprecationReason: field.DeprecationReason,
 		LinkedModelName:   linkedModelName,
 		LinkedModel:       linkedModel,
+		Type:              field.Type,
 		Field:             field.Field,
 		LinkedField:       field.LinkedField,
 	}
@@ -272,10 +279,21 @@ func generateQueriesForModel(serverConfig *FinalServerConfig, model *FinalModel)
 	if !model.GraphQL.DisableGetOne {
 		results = append(results, GetOneQuery(serverConfig, model))
 	}
-	// results = append(results, GetMultipleQuery(serverConfig, model))
+	if !model.GraphQL.DisableGetMultiple {
+		results = append(results, GetMultipleQuery(serverConfig, model))
+	}
 	return results
 }
 
 func generateMutationsForModels(serverConfig *FinalServerConfig, model *FinalModel) []Resolvable {
+	if !model.GraphQL.DisableCreate {
+		// results = append(results, GetOneQuery(serverConfig, model))
+	}
+	if !model.GraphQL.DisableUpdate {
+		// results = append(results, GetOneQuery(serverConfig, model))
+	}
+	if !model.GraphQL.DisableDelete {
+		// results = append(results, GetMultipleQuery(serverConfig, model))
+	}
 	return []Resolvable{}
 }

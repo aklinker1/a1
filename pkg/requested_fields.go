@@ -46,7 +46,6 @@ func createRequestedFieldMap(serverConfig *FinalServerConfig, model *FinalModel,
 		case *FinalVirtualField:
 			virtualField := field.(*FinalVirtualField)
 			for _, requiredFieldName := range virtualField.RequiredFields {
-				fmt.Printf("Required: %s, %v\n", requiredFieldName, fieldNames[requiredFieldName])
 				if _, exists := fieldNames[requiredFieldName]; !exists {
 					// TODO - Make recursive to handle linked object requirements, or just add the fields to the fieldNames object?
 					fieldMap[requiredFieldName] = RequestedField{
@@ -62,6 +61,15 @@ func createRequestedFieldMap(serverConfig *FinalServerConfig, model *FinalModel,
 			linkedField := field.(*FinalLinkedField)
 			requestedField.Model = linkedField.LinkedModel
 			requestedField.InnerFields = createRequestedFieldMap(serverConfig, linkedField.LinkedModel, nextFieldNames)
+			requiredFieldName := linkedField.Field
+			if _, exists := fieldNames[requiredFieldName]; !exists {
+				fieldMap[requiredFieldName] = RequestedField{
+					WasRequired: true,
+					Field:       model.Fields[requiredFieldName],
+					InnerFields: nil,
+					Model:       nil,
+				}
+			}
 		}
 
 		fieldMap[fieldName] = requestedField

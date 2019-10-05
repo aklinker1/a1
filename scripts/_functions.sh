@@ -42,7 +42,11 @@ function build() {
     bullet "Cleaning"
     [ -f "out/$EXAMPLE_DIR" ] && rm "out/$EXAMPLE_DIR"
     bullet "Building"
-    go build -o "out/$EXAMPLE_DIR" "examples/$EXAMPLE_DIR/main.go" "examples/$EXAMPLE_DIR/models.go"
+    go build -o "out/$EXAMPLE_DIR" \
+        "examples/$EXAMPLE_DIR/main.go" \
+        "examples/$EXAMPLE_DIR/models.go" \
+        "examples/$EXAMPLE_DIR/types.go" \
+        "examples/$EXAMPLE_DIR/cache_data.go"
 }
 
 function run() {
