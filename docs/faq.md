@@ -9,6 +9,8 @@ __A1 does not do any database interaction__. All database interactions go though
     
 </details>
 
+<br/>
+
 ### 2. Can I still customize a `GetOne` query or any other queries where I don't want the default behavior?
 
 <details>
@@ -17,6 +19,8 @@ __A1 does not do any database interaction__. All database interactions go though
 Of course! Check out [this page]() to find out how to override any default behaviors.
 
 </details>
+
+<br/>
 
 ### 3. Do you support subscriptions?
 
