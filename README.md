@@ -1,6 +1,6 @@
 <img width="200" src="https://user-images.githubusercontent.com/10101283/66178622-8f14d480-e62b-11e9-8db7-d18cc7885fb3.png"> &emsp;__README__
 
-A1 is a GraphQL framework written in Go. It is designed to remove boilerplate code by defining only the models returned by the API and their relationships. This makes setting up an entire API a peice of cake.
+A1 is a GraphQL framework written in Go. It is designed to remove boilerplate code by defining only the models returned by the API and their relationships. This makes setting up an entire API a piece of cake.
 
 ## Installation and Usage
 
@@ -11,7 +11,7 @@ You can either start from scratch by installing the library directly using `go g
 go get github.com/aklinker1/a1
 
 # Clone a boilerplate project
-git clone https://github.com/aklinker1/a1-boilerplate
+git clone https://github.com/aklinker1/a1-boilerplate.git
 ```
 
 Then to use the framework, simply create a new `a1.ServerConfig` and then call `a1.Start(ServerConfig)` to start the server.
@@ -34,7 +34,7 @@ func main() {
 
 ## Basic Example
 
-A simple todo application with users and todos. This example includes all thre types of fields: `Field`, `VirtualField`, and `LinkedField`.
+A simple todo application with users and todos. This example includes all three types of fields: `Field`, `VirtualField`, and `LinkedField`.
 
 ```go
 package example
@@ -87,9 +87,9 @@ var models = a1.ModelMap{
                 PrimaryKey: true,
                 Type:       "ID",
             },
-            "value": "String",
+            "value":      "String",
             "isChecked":  "Boolean",
-            "userId":  "ID",
+            "userId":     "ID",
             "user": a1.LinkedField{
                 Model:       "User",
                 Type:        a1.ManyToOne,
