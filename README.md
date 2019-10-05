@@ -24,7 +24,7 @@ import (
 func main() {
     server := a1.ServerConfig{
         DataLoaders: a1.DataLoaderMap{ /* define data loaders */ },
-        Models:      a1.ModelMap{ /* define models loaders */ },
+        Models:      a1.ModelMap{ /* define models */ },
         Port:        8000,
         Endpoint:    "/graphql",
     }
@@ -58,12 +58,12 @@ var models = a1.ModelMap{
         Fields: a1.FieldMap{
             "id": a1.Field{
                 PrimaryKey: true,
-                Type:       "ID",
+                Type:       a1Types.ID,
             },
-            "firstName": "String",
-            "lastName":  "String",
+            "firstName": a1Types.String,
+            "lastName":  a1Types.String,
             "fullName": a1.VirtualField{
-                Type:           "String",
+                Type:           a1Types.String,
                 RequiredFields: []string{"firstName", "lastName"},
                 Computed: func (data: a1.DataMap) interface{} {
                     return fmt.Sprintf("%s %s", data["firstName"], data["lastName"])
@@ -87,9 +87,9 @@ var models = a1.ModelMap{
                 PrimaryKey: true,
                 Type:       "ID",
             },
-            "value":      "String",
-            "isChecked":  "Boolean",
-            "userId":     "ID",
+            "value":      a1Types.String,
+            "isChecked":  a1Types.Boolean,
+            "userId":     a1Types.ID,
             "user": a1.LinkedField{
                 Model:       "User",
                 Type:        a1.ManyToOne,
