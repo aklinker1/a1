@@ -1,7 +1,10 @@
 package pkg
 
 import (
+	"fmt"
+
 	utils "github.com/aklinker1/a1/pkg/utils"
+	errors "github.com/go-errors/errors"
 	graphql "github.com/graphql-go/graphql"
 )
 
@@ -174,6 +177,8 @@ func (resolver Resolvable) graphqlResolver() func(params graphql.ResolveParams) 
 		// Call Resolver
 		result, err := resolver.Resolver(args, fields)
 		if err != nil {
+			stack := errors.New(err).ErrorStack()
+			fmt.Println("STACK", stack)
 			return nil, err
 		}
 		resultMap, isMap := result.(DataMap)

@@ -1,6 +1,8 @@
 package pkg
 
-import utils "github.com/aklinker1/a1/pkg/utils"
+import (
+	utils "github.com/aklinker1/a1/pkg/utils"
+)
 
 // GetOneQuery -
 func GetOneQuery(serverConfig *FinalServerConfig, model *FinalModel) Resolvable {
@@ -42,12 +44,15 @@ func UpdateMutation(serverConfig *FinalServerConfig, model *FinalModel) Resolvab
 				Type: model.Fields[model.PrimaryKey].(*FinalField).Type.Name,
 			},
 			Argument{
-				Name: utils.LowerFirstChar(model.Name),
+				Name: "data",
 				Type: "Input_" + model.Name,
 			},
 		},
 		Resolver: func(args DataMap, requestedFields RequestedFieldMap) (interface{}, error) {
-			return getMultipleModels(serverConfig, model, args, requestedFields)
+			data := args["data"]
+			delete(args, "data")
+			whereArgs := args
+			return updateModel(serverConfig, model, data, whereArgs, requestedFields)
 		},
 	}
 }
