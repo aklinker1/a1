@@ -17,41 +17,36 @@ func convertTypes(types CustomTypeMap) FinalCustomTypeMap {
 			Name:        "Int",
 			GraphQLType: graphql.Int,
 		},
-		// "Long": &FinalCustomType{
-		// 	Name:        "Long",
-		// 	GraphQLType: graphql.Long,
-		// },
 		"Float": &FinalCustomType{
 			Name:        "Float",
 			GraphQLType: graphql.Float,
 		},
-		// "Double": &FinalCustomType{
-		// 	Name:        "Double",
-		// 	GraphQLType: graphql.Double,
-		// },
 		"String": &FinalCustomType{
 			Name:        "String",
 			GraphQLType: graphql.String,
-		},
-		"ID": &FinalCustomType{
-			Name:        "ID",
-			GraphQLType: graphql.ID,
 		},
 		"Date": &FinalCustomType{
 			Name:        "Date",
 			GraphQLType: graphql.DateTime,
 		},
 	}
+	for extendedTypeName, extendedType := range extendedTypes {
+		finalTypes[extendedTypeName] = convertType(extendedTypeName, extendedType)
+	}
 	for customTypeName, customType := range types {
-		finalTypes[customTypeName] = &FinalCustomType{
-			Name:        customTypeName,
-			Description: customType.Description,
-			ToJSON:      customType.ToJSON,
-			FromJSON:    customType.FromJSON,
-			FromLiteral: customType.FromLiteral,
-		}
+		finalTypes[customTypeName] = convertType(customTypeName, customType)
 	}
 	return finalTypes
+}
+
+func convertType(name string, customType CustomType) *FinalCustomType {
+	return &FinalCustomType{
+		Name:        name,
+		Description: customType.Description,
+		ToJSON:      customType.ToJSON,
+		FromJSON:    customType.FromJSON,
+		FromLiteral: customType.FromLiteral,
+	}
 }
 
 func convertDataLoader(name string, dataLoader DataLoader) FinalDataLoader {
@@ -287,14 +282,15 @@ func generateQueriesForModel(serverConfig *FinalServerConfig, model *FinalModel)
 }
 
 func generateMutationsForModels(serverConfig *FinalServerConfig, model *FinalModel) []Resolvable {
+	results := []Resolvable{}
 	if !model.GraphQL.DisableCreate {
 		// results = append(results, GetOneQuery(serverConfig, model))
 	}
 	if !model.GraphQL.DisableUpdate {
-		// results = append(results, GetOneQuery(serverConfig, model))
+		results = append(results, UpdateMutation(serverConfig, model))
 	}
 	if !model.GraphQL.DisableDelete {
 		// results = append(results, GetMultipleQuery(serverConfig, model))
 	}
-	return []Resolvable{}
+	return results
 }

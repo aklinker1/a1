@@ -43,27 +43,15 @@ func inputModelsWithoutLinkedFields(types graphql.TypeMap, models FinalModelMap)
 	return inputs
 }
 
-func inputFieldsWithoutLinked(types graphql.TypeMap, fields FinalFieldMap) graphql.Fields {
-	inputFields := graphql.Fields{}
+func inputFieldsWithoutLinked(types graphql.TypeMap, fields FinalFieldMap) graphql.InputObjectConfigFieldMap {
+	inputFields := graphql.InputObjectConfigFieldMap{}
 	for fieldName, field := range fields {
-		switch field.(type) {
-		case Field:
-			regularField := field.(Field)
+		if regularField, isRegularField := field.(*FinalField); isRegularField {
 			if !regularField.Hidden {
-				inputFields[fieldName] = &graphql.Field{
-					Name:              fieldName,
-					Type:              types[regularField.Type],
-					Description:       regularField.Description,
-					DeprecationReason: regularField.DeprecationReason,
+				inputFields[fieldName] = &graphql.InputObjectFieldConfig{
+					Type:        types[regularField.Type.Name],
+					Description: regularField.Description,
 				}
-			}
-		case VirtualField:
-			virtualField := field.(VirtualField)
-			inputFields[fieldName] = &graphql.Field{
-				Name:              fieldName,
-				Type:              types[virtualField.Type],
-				Description:       virtualField.Description,
-				DeprecationReason: virtualField.DeprecationReason,
 			}
 		}
 	}
@@ -71,16 +59,15 @@ func inputFieldsWithoutLinked(types graphql.TypeMap, fields FinalFieldMap) graph
 }
 
 func addLinksToInputObjects(inputs map[string]*graphql.InputObject, models FinalModelMap) {
-	var count int
 	for _, model := range models {
 		for _, field := range model.Fields {
-			linkedField, isLinkedField := field.(FinalLinkedField)
+			linkedField, isLinkedField := field.(*FinalLinkedField)
 			if isLinkedField {
-				inputs[model.Name].AddFieldConfig(linkedField.Name, &graphql.InputObjectFieldConfig{
-					Type:        inputs[model.Name],
+				linkedInputModelName := "Input_" + linkedField.LinkedModelName
+				inputs["Input_"+model.Name].AddFieldConfig(linkedField.Name, &graphql.InputObjectFieldConfig{
+					Type:        inputs[linkedInputModelName],
 					Description: linkedField.Description,
 				})
-				count++
 			}
 		}
 	}
@@ -130,7 +117,6 @@ func outputFieldsWithoutLinked(types graphql.TypeMap, fields FinalFieldMap) grap
 }
 
 func addLinksToOutputObjects(outputs map[string]*graphql.Object, models FinalModelMap) {
-	var count int
 	for _, model := range models {
 		for _, field := range model.Fields {
 			linkedField, isLinkedField := field.(*FinalLinkedField)
@@ -150,11 +136,12 @@ func addLinksToOutputObjects(outputs map[string]*graphql.Object, models FinalMod
 						Description:       linkedField.Description,
 					})
 				}
-				count++
 			}
 		}
 	}
 }
+
+// RESOLVERS
 
 func (resolver Resolvable) graphqlResolver() func(params graphql.ResolveParams) (interface{}, error) {
 	isVerbose := utils.IsVerbose()

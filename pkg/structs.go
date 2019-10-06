@@ -30,7 +30,8 @@ type RequestedFieldMap = map[string]RequestedField
 type DataLoader struct {
 	Connect     func() error
 	GetOne      func(model *FinalModel, args DataMap, fields RequestedFieldMap) (DataMap, error)
-	GetMultiple func(model *FinalModel, searchFields DataMap, fields RequestedFieldMap) ([]DataMap, error)
+	GetMultiple func(model *FinalModel, args DataMap, fields RequestedFieldMap) ([]DataMap, error)
+	Update      func(model *FinalModel, args DataMap, inputData DataMap, fields RequestedFieldMap) (DataMap, error)
 }
 
 // DataLoaderMap -
@@ -41,7 +42,7 @@ type FinalDataLoader struct {
 	Name        string
 	Connect     func() error
 	GetOne      func(model *FinalModel, args DataMap, fields RequestedFieldMap) (DataMap, error)
-	GetMultiple func(model *FinalModel, searchFields DataMap, fields RequestedFieldMap) ([]DataMap, error)
+	GetMultiple func(model *FinalModel, args DataMap, fields RequestedFieldMap) ([]DataMap, error)
 }
 
 // FinalDataLoaderMap -
