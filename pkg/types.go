@@ -3,12 +3,31 @@ package pkg
 import (
 	"strconv"
 
+	graphql "github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/language/ast"
 )
 
-var extendedTypes = CustomTypeMap{
-	Int64:   int64Type,
-	Float64: float64Type,
+var builtinTypes = CustomTypeMap{
+	// Existing Types:
+	"Bool": CustomType{
+		GraphQLType: graphql.Boolean,
+	},
+	"Int": CustomType{
+		GraphQLType: graphql.Int,
+	},
+	"Float": CustomType{
+		GraphQLType: graphql.Float,
+	},
+	"String": CustomType{
+		GraphQLType: graphql.String,
+	},
+	"Date": CustomType{
+		GraphQLType: graphql.DateTime,
+	},
+
+	// Extended types
+	"Int64":   int64Type,
+	"Float64": float64Type,
 }
 
 var int64Type = CustomType{

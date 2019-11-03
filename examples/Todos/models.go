@@ -50,14 +50,23 @@ var models = a1.ModelMap{
 		Fields: a1.FieldMap{
 			"email":      "Email",
 			"validation": "Validation",
-			"firstName":  a1.String,
-			"lastName":   a1.String,
+			"firstName":  a1.NullableString,
+			"lastName":   a1.NullableString,
 
 			"fullName": a1.VirtualField{
-				Type:           a1.String,
+				Type:           a1.NullableString,
 				RequiredFields: []string{"firstName", "lastName"},
 				Compute: func(data map[string]interface{}) (interface{}, error) {
-					return fmt.Sprintf("%s %s", data["firstName"], data["lastName"]), nil
+					firstName, hasFirstName := data["firstName"]
+					lastName, hasLastName := data["lastName"]
+					if hasFirstName && hasLastName {
+						return fmt.Sprintf("%s %s", firstName, lastName), nil
+					} else if hasFirstName {
+						return firstName, nil
+					} else if hasLastName {
+						return lastName, nil
+					}
+					return nil, nil
 				},
 			},
 
@@ -182,7 +191,7 @@ var models = a1.ModelMap{
 				Type:      a1.String,
 				DataField: "tag_name",
 			},
-			"addedAt": a1.Date,
+			"addedAt": a1.NullableDate,
 
 			"tag": a1.LinkedField{
 				LinkedModel: "Tag",

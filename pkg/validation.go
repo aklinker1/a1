@@ -142,7 +142,11 @@ func validateModelFields(serverConfig *FinalServerConfig, model *FinalModel, fie
 }
 
 func validateType(types FinalCustomTypeMap, typeName string) *FinalCustomType {
-	t, tExists := types[typeName]
+	tName := typeName
+	if strings.HasSuffix(tName, "?") {
+		tName = strings.ReplaceAll(tName, "?", "")
+	}
+	t, tExists := types[tName]
 	if !tExists {
 		fmt.Printf("Type '%s' is not a type\n", typeName)
 		os.Exit(1)

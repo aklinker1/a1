@@ -4,42 +4,34 @@ import (
 	"fmt"
 	"os"
 
+	utils "github.com/aklinker1/a1/pkg/utils"
 	graphql "github.com/graphql-go/graphql"
 )
 
-func convertTypes(types CustomTypeMap) FinalCustomTypeMap {
-	finalTypes := FinalCustomTypeMap{
-		"Bool": &FinalCustomType{
-			Name:        "Bool",
-			GraphQLType: graphql.Boolean,
-		},
-		"Int": &FinalCustomType{
-			Name:        "Int",
-			GraphQLType: graphql.Int,
-		},
-		"Float": &FinalCustomType{
-			Name:        "Float",
-			GraphQLType: graphql.Float,
-		},
-		"String": &FinalCustomType{
-			Name:        "String",
-			GraphQLType: graphql.String,
-		},
-		"Date": &FinalCustomType{
-			Name:        "Date",
-			GraphQLType: graphql.DateTime,
-		},
+func convertTypes(customTypes CustomTypeMap) FinalCustomTypeMap {
+	finalTypes := FinalCustomTypeMap{}
+
+	utils.LogWhite("[Builtin Types - %d]", len(builtinTypes))
+	for builtinTypeName, builtinType := range builtinTypes {
+		finalTypes[builtinTypeName] = convertType(builtinTypeName, builtinType)
+		utils.Log("  - %s", builtinTypeName)
 	}
-	for extendedTypeName, extendedType := range extendedTypes {
-		finalTypes[extendedTypeName] = convertType(extendedTypeName, extendedType)
-	}
-	for customTypeName, customType := range types {
+	utils.LogWhite("[Custom Types - %d]", len(customTypes))
+	for customTypeName, customType := range customTypes {
 		finalTypes[customTypeName] = convertType(customTypeName, customType)
+		utils.Log("  - %s", customTypeName)
 	}
+
 	return finalTypes
 }
 
 func convertType(name string, customType CustomType) *FinalCustomType {
+	if customType.GraphQLType != nil {
+		return &FinalCustomType{
+			Name:        name,
+			GraphQLType: customType.GraphQLType,
+		}
+	}
 	return &FinalCustomType{
 		Name:        name,
 		Description: customType.Description,
@@ -173,6 +165,7 @@ func convertLinkedField(models FinalModelMap, fieldName string, field LinkedFiel
 		Name:              fieldName,
 		Description:       field.Description,
 		DeprecationReason: field.DeprecationReason,
+		IsNullable:        field.IsNullable,
 		LinkedModelName:   linkedModelName,
 		LinkedModel:       linkedModel,
 		Type:              field.Type,

@@ -233,10 +233,6 @@ func parseServerConfig(serverConfig ServerConfig) (*FinalServerConfig, []error) 
 
 	// Get graphql types
 	graphqlTypes := getGraphqlTypes(types)
-	graphqlTypesArray := []graphql.Type{}
-	for _, graphqlType := range graphqlTypes {
-		graphqlTypesArray = append(graphqlTypesArray, graphqlType)
-	}
 
 	// Create output model types
 	outputModels := outputModelsWithoutLinkedFields(graphqlTypes, models)

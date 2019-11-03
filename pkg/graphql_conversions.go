@@ -15,15 +15,20 @@ func getGraphqlTypes(types FinalCustomTypeMap) graphql.TypeMap {
 
 	for _, customType := range types {
 		if customType.GraphQLType != nil {
-			output[customType.Name] = customType.GraphQLType
+			// output[customType.Name] = customType.GraphQLType
+			output[customType.Name] = graphql.NewNonNull(customType.GraphQLType)
+			output[customType.Name+"?"] = customType.GraphQLType
 		} else {
-			output[customType.Name] = graphql.NewScalar(graphql.ScalarConfig{
+			scalar := graphql.NewScalar(graphql.ScalarConfig{
 				Name:         customType.Name,
 				Description:  customType.Description,
 				Serialize:    customType.ToJSON,
 				ParseValue:   customType.FromJSON,
 				ParseLiteral: customType.FromLiteral,
 			})
+			// output[customType.Name] = scalar
+			output[customType.Name] = graphql.NewNonNull(scalar)
+			output[customType.Name+"?"] = scalar
 		}
 	}
 	return output
@@ -52,7 +57,7 @@ func inputFieldsWithoutLinked(types graphql.TypeMap, fields FinalFieldMap) graph
 		if regularField, isRegularField := field.(*FinalField); isRegularField {
 			if !regularField.Hidden {
 				inputFields[fieldName] = &graphql.InputObjectFieldConfig{
-					Type:        types[regularField.Type.Name],
+					Type:        types[regularField.TypeName],
 					Description: regularField.Description,
 				}
 			}
@@ -101,7 +106,7 @@ func outputFieldsWithoutLinked(types graphql.TypeMap, fields FinalFieldMap) grap
 			if !regularField.Hidden {
 				outputFields[fieldName] = &graphql.Field{
 					Name:              fieldName,
-					Type:              types[regularField.Type.Name],
+					Type:              types[regularField.TypeName],
 					Description:       regularField.Description,
 					DeprecationReason: regularField.DeprecationReason,
 				}
@@ -110,7 +115,7 @@ func outputFieldsWithoutLinked(types graphql.TypeMap, fields FinalFieldMap) grap
 			virtualField := field.(*FinalVirtualField)
 			outputFields[fieldName] = &graphql.Field{
 				Name:              fieldName,
-				Type:              types[virtualField.Type.Name],
+				Type:              types[virtualField.TypeName],
 				Description:       virtualField.Description,
 				DeprecationReason: virtualField.DeprecationReason,
 			}
@@ -124,18 +129,22 @@ func addLinksToOutputObjects(outputs map[string]*graphql.Object, models FinalMod
 		for _, field := range model.Fields {
 			linkedField, isLinkedField := field.(*FinalLinkedField)
 			if isLinkedField {
+				var t graphql.Type = outputs[linkedField.LinkedModelName]
+				if !linkedField.IsNullable {
+					t = graphql.NewNonNull(t)
+				}
 				if linkedField.Type == OneToMany {
 					outputs[model.Name].AddFieldConfig(linkedField.Name, &graphql.Field{
 						Name:              linkedField.Name,
 						DeprecationReason: linkedField.DeprecationReason,
-						Type:              graphql.NewList(outputs[linkedField.LinkedModelName]),
+						Type:              graphql.NewList(t),
 						Description:       linkedField.Description,
 					})
 				} else {
 					outputs[model.Name].AddFieldConfig(linkedField.Name, &graphql.Field{
 						Name:              linkedField.Name,
 						DeprecationReason: linkedField.DeprecationReason,
-						Type:              outputs[linkedField.LinkedModelName],
+						Type:              t,
 						Description:       linkedField.Description,
 					})
 				}
@@ -216,7 +225,7 @@ func graphqlArguments(arguments []Argument, allTypes graphql.TypeMap) graphql.Fi
 func (resolver Resolvable) graphqlResolverEntry(allTypes graphql.TypeMap) *graphql.Field {
 	var returnType graphql.Output = allTypes[resolver.Model.Name]
 	if resolver.ResturnsList {
-		returnType = graphql.NewList(allTypes[resolver.Model.Name])
+		returnType = graphql.NewList(graphql.NewNonNull(allTypes[resolver.Model.Name]))
 	}
 	return &graphql.Field{
 		Name:        resolver.Name,

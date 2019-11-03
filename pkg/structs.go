@@ -29,9 +29,9 @@ type RequestedFieldMap = map[string]RequestedField
 // DataLoader -
 type DataLoader struct {
 	Connect     func() error
-	GetOne      func(model *FinalModel, args DataMap, fields RequestedFieldMap) (DataMap, error)
-	GetMultiple func(model *FinalModel, args DataMap, fields RequestedFieldMap) ([]DataMap, error)
-	Update      func(model *FinalModel, inputData DataMap, whereArgs DataMap, fields RequestedFieldMap) (DataMap, error)
+	GetOne      func(model *FinalModel, args DataMap, requestedFields RequestedFieldMap) (DataMap, error)
+	GetMultiple func(model *FinalModel, args DataMap, requestedFields RequestedFieldMap) ([]DataMap, error)
+	Update      func(model *FinalModel, inputData DataMap, whereArgs DataMap, requestedFields RequestedFieldMap) (DataMap, error)
 }
 
 // DataLoaderMap -
@@ -41,9 +41,9 @@ type DataLoaderMap = map[string]DataLoader
 type FinalDataLoader struct {
 	Name        string
 	Connect     func() error
-	GetOne      func(model *FinalModel, args DataMap, fields RequestedFieldMap) (DataMap, error)
-	GetMultiple func(model *FinalModel, args DataMap, fields RequestedFieldMap) ([]DataMap, error)
-	Update      func(model *FinalModel, updateData DataMap, whereArgs DataMap, fields RequestedFieldMap) (DataMap, error)
+	GetOne      func(model *FinalModel, args DataMap, requestedFields RequestedFieldMap) (DataMap, error)
+	GetMultiple func(model *FinalModel, args DataMap, requestedFields RequestedFieldMap) ([]DataMap, error)
+	Update      func(model *FinalModel, updateData DataMap, whereArgs DataMap, requestedFields RequestedFieldMap) (DataMap, error)
 }
 
 // FinalDataLoaderMap -
@@ -68,6 +68,7 @@ type ASTValue = ast.Value
 // CustomType -
 type CustomType struct {
 	Description string
+	GraphQLType graphql.Type
 	ToJSON      func(value interface{}) interface{}
 	FromJSON    func(value interface{}) interface{}
 	FromLiteral func(value ASTValue) interface{}
@@ -178,6 +179,7 @@ type FinalVirtualField struct {
 type LinkedField struct {
 	Description       string
 	DeprecationReason string
+	IsNullable        bool
 	CustomModelName   string
 	LinkedModel       string
 	Type              LinkType
@@ -203,6 +205,7 @@ type FinalLinkedField struct {
 	Name              string
 	Description       string
 	DeprecationReason string
+	IsNullable        bool
 	LinkedModelName   string
 	LinkedModel       *FinalModel
 	Type              LinkType
@@ -373,5 +376,5 @@ type Resolvable struct {
 	Description  string
 	Arguments    []Argument
 	ResturnsList bool
-	Resolver     func(args DataMap, fields RequestedFieldMap) (interface{}, error)
+	Resolver     func(args DataMap, requestedFields RequestedFieldMap) (interface{}, error)
 }
