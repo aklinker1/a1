@@ -55,6 +55,7 @@ func convertDataLoader(name string, dataLoader DataLoader) FinalDataLoader {
 		Connect:     dataLoader.Connect,
 		GetOne:      dataLoader.GetOne,
 		GetMultiple: dataLoader.GetMultiple,
+		Update:      dataLoader.Update,
 	}
 }
 

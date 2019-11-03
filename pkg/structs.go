@@ -31,7 +31,7 @@ type DataLoader struct {
 	Connect     func() error
 	GetOne      func(model *FinalModel, args DataMap, fields RequestedFieldMap) (DataMap, error)
 	GetMultiple func(model *FinalModel, args DataMap, fields RequestedFieldMap) ([]DataMap, error)
-	Update      func(model *FinalModel, args DataMap, inputData DataMap, fields RequestedFieldMap) (DataMap, error)
+	Update      func(model *FinalModel, inputData DataMap, whereArgs DataMap, fields RequestedFieldMap) (DataMap, error)
 }
 
 // DataLoaderMap -
@@ -43,6 +43,7 @@ type FinalDataLoader struct {
 	Connect     func() error
 	GetOne      func(model *FinalModel, args DataMap, fields RequestedFieldMap) (DataMap, error)
 	GetMultiple func(model *FinalModel, args DataMap, fields RequestedFieldMap) ([]DataMap, error)
+	Update      func(model *FinalModel, updateData DataMap, whereArgs DataMap, fields RequestedFieldMap) (DataMap, error)
 }
 
 // FinalDataLoaderMap -

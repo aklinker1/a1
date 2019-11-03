@@ -49,7 +49,7 @@ func UpdateMutation(serverConfig *FinalServerConfig, model *FinalModel) Resolvab
 			},
 		},
 		Resolver: func(args DataMap, requestedFields RequestedFieldMap) (interface{}, error) {
-			data := args["data"]
+			data := args["data"].(DataMap)
 			delete(args, "data")
 			whereArgs := args
 			return updateModel(serverConfig, model, data, whereArgs, requestedFields)
