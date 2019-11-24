@@ -12,7 +12,7 @@ func GetOneQuery(serverConfig *FinalServerConfig, model *FinalModel) Resolvable 
 		Arguments: []Argument{
 			Argument{
 				Name: model.PrimaryKey,
-				Type: model.Fields[model.PrimaryKey].(*FinalField).TypeName,
+				Type: model.Fields[model.PrimaryKey].(*FinalField).Type.Name,
 			},
 		},
 		Resolver: func(args DataMap, requestedFields RequestedFieldMap) (interface{}, error) {

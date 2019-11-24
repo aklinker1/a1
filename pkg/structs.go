@@ -43,7 +43,7 @@ type FinalDataLoader struct {
 	Connect     func() error
 	GetOne      func(model *FinalModel, args DataMap, requestedFields RequestedFieldMap) (DataMap, error)
 	GetMultiple func(model *FinalModel, args DataMap, requestedFields RequestedFieldMap) ([]DataMap, error)
-	Update      func(model *FinalModel, updateData DataMap, whereArgs DataMap, requestedFields RequestedFieldMap) (DataMap, error)
+	Update      func(model *FinalModel, inputData DataMap, whereArgs DataMap, requestedFields RequestedFieldMap) (DataMap, error)
 }
 
 // FinalDataLoaderMap -

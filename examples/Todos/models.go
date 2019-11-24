@@ -57,13 +57,13 @@ var models = a1.ModelMap{
 				Type:           a1.NullableString,
 				RequiredFields: []string{"firstName", "lastName"},
 				Compute: func(data map[string]interface{}) (interface{}, error) {
-					firstName, hasFirstName := data["firstName"]
-					lastName, hasLastName := data["lastName"]
-					if hasFirstName && hasLastName {
+					firstName := data["firstName"]
+					lastName := data["lastName"]
+					if firstName != nil && lastName != nil {
 						return fmt.Sprintf("%s %s", firstName, lastName), nil
-					} else if hasFirstName {
+					} else if firstName != nil {
 						return firstName, nil
-					} else if hasLastName {
+					} else if lastName != nil {
 						return lastName, nil
 					}
 					return nil, nil
@@ -90,8 +90,6 @@ var models = a1.ModelMap{
 			DisableSelectMultiple: true,
 			DisableCreate:         true,
 			DisableDelete:         true,
-
-			// DisableUpdate: true,
 		},
 		Fields: a1.FieldMap{
 			"_id": a1.Field{
@@ -115,9 +113,6 @@ var models = a1.ModelMap{
 	},
 	"Todo": a1.Model{
 		DataLoader: postgreSQLTable("todos"),
-		GraphQL: a1.GraphQLConfig{
-			DisableUpdate: true,
-		},
 		Fields: a1.FieldMap{
 			"_id": a1.Field{
 				Type:       a1.Int,

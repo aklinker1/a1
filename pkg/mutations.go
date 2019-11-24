@@ -1,10 +1,7 @@
 package pkg
 
-import "fmt"
-
 func updateModel(serverConfig *FinalServerConfig, model *FinalModel, inputData DataMap, whereArgs DataMap, requestedFields RequestedFieldMap) (interface{}, error) {
 	dataLoaderWhereArgs := convertDataLoaderInput(model, whereArgs)
-	fmt.Println("User Input:", inputData["user"])
 
 	// Separate Linked vs Regular fields
 	linkedInputFields := DataMap{}

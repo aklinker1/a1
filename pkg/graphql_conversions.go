@@ -15,7 +15,6 @@ func getGraphqlTypes(types FinalCustomTypeMap) graphql.TypeMap {
 
 	for _, customType := range types {
 		if customType.GraphQLType != nil {
-			// output[customType.Name] = customType.GraphQLType
 			output[customType.Name] = graphql.NewNonNull(customType.GraphQLType)
 			output[customType.Name+"?"] = customType.GraphQLType
 		} else {
@@ -26,7 +25,6 @@ func getGraphqlTypes(types FinalCustomTypeMap) graphql.TypeMap {
 				ParseValue:   customType.FromJSON,
 				ParseLiteral: customType.FromLiteral,
 			})
-			// output[customType.Name] = scalar
 			output[customType.Name] = graphql.NewNonNull(scalar)
 			output[customType.Name+"?"] = scalar
 		}
@@ -57,7 +55,7 @@ func inputFieldsWithoutLinked(types graphql.TypeMap, fields FinalFieldMap) graph
 		if regularField, isRegularField := field.(*FinalField); isRegularField {
 			if !regularField.Hidden {
 				inputFields[fieldName] = &graphql.InputObjectFieldConfig{
-					Type:        types[regularField.TypeName],
+					Type:        types[regularField.Type.Name+"?"],
 					Description: regularField.Description,
 				}
 			}
@@ -71,7 +69,7 @@ func addLinksToInputObjects(inputs map[string]*graphql.InputObject, models Final
 		for _, field := range model.Fields {
 			linkedField, isLinkedField := field.(*FinalLinkedField)
 			if isLinkedField {
-				linkedInputModelName := "Input_" + linkedField.LinkedModelName
+				linkedInputModelName := "Input_" + linkedField.LinkedModel.Name
 				inputs["Input_"+model.Name].AddFieldConfig(linkedField.Name, &graphql.InputObjectFieldConfig{
 					Type:        inputs[linkedInputModelName],
 					Description: linkedField.Description,
@@ -158,7 +156,7 @@ func addLinksToOutputObjects(outputs map[string]*graphql.Object, models FinalMod
 func (resolver Resolvable) graphqlResolver() func(params graphql.ResolveParams) (interface{}, error) {
 	isVerbose := utils.IsVerbose()
 	return func(params graphql.ResolveParams) (interface{}, error) {
-		utils.Log("\n  %s(args: %v)", resolver.Name, resolver.Arguments)
+		utils.Log("\n  %s(args: %v)", resolver.Name, params.Args)
 		// Check Authorization
 		// myUser, err := middleware.Authorize(params.Context, function.AuthRequired)
 		// if err != nil {

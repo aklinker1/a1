@@ -282,24 +282,13 @@ func parseServerConfig(serverConfig ServerConfig) (*FinalServerConfig, []error) 
 	for _, model := range baseModels {
 		mutationResolvables = append(mutationResolvables, generateMutationsForModels(finalServerConfig, model)...)
 	}
-	mutations := graphql.Fields{
-		"placeholder": &graphql.Field{
-			Name: "placeholder",
-			Type: allTypes["Preferences"],
-			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-				return nil, nil
-			},
-		},
-	}
 	utils.LogWhite("[Mutations - %d]", len(mutationResolvables))
+	mutations := graphql.Fields{}
 	for _, mutation := range mutationResolvables {
 		mutations[mutation.Name] = mutation.graphqlResolverEntry(allTypes)
 		utils.Log("  - %s", mutation.Name)
 	}
 	finalServerConfig.GraphQLMutations = mutations
-	// finalServerConfig.GraphQLMutations = graphql.Fields{
-	// 	"placeholder": nil,
-	// }
 
 	return finalServerConfig, nil
 }

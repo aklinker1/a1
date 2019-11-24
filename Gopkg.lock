@@ -8,10 +8,11 @@
   version = "v1.0.1"
 
 [[projects]]
+  branch = "explicit-null"
   name = "github.com/graphql-go/graphql"
   packages = [".","gqlerrors","language/ast","language/kinds","language/lexer","language/location","language/parser","language/printer","language/source","language/typeInfo","language/visitor"]
-  revision = "2b0b7340d2285b861482047fbf5de0488e021bea"
-  version = "v0.7.8"
+  revision = "f2c8ec7f243fcdc158b78ee80a031b778d3ea206"
+  source = "github.com/aklinker1/graphql"
 
 [[projects]]
   name = "github.com/joho/godotenv"
@@ -22,6 +23,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "48fd73bdfc6e6c8fa903ce873c5d289fa08b39a85e346c45d2fe9a72e29fb1ae"
+  inputs-digest = "eb81a48ea957674eaf1ddb759567bfca423416d147031a547a6594018c4bd361"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -13,13 +13,13 @@ func convertTypes(customTypes CustomTypeMap) FinalCustomTypeMap {
 
 	utils.LogWhite("[Builtin Types - %d]", len(builtinTypes))
 	for builtinTypeName, builtinType := range builtinTypes {
-		finalTypes[builtinTypeName] = convertType(builtinTypeName, builtinType)
 		utils.Log("  - %s", builtinTypeName)
+		finalTypes[builtinTypeName] = convertType(builtinTypeName, builtinType)
 	}
 	utils.LogWhite("[Custom Types - %d]", len(customTypes))
 	for customTypeName, customType := range customTypes {
-		finalTypes[customTypeName] = convertType(customTypeName, customType)
 		utils.Log("  - %s", customTypeName)
+		finalTypes[customTypeName] = convertType(customTypeName, customType)
 	}
 
 	return finalTypes
