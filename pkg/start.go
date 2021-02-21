@@ -233,10 +233,6 @@ func parseServerConfig(serverConfig ServerConfig) (*FinalServerConfig, []error) 
 
 	// Get graphql types
 	graphqlTypes := getGraphqlTypes(types)
-	graphqlTypesArray := []graphql.Type{}
-	for _, graphqlType := range graphqlTypes {
-		graphqlTypesArray = append(graphqlTypesArray, graphqlType)
-	}
 
 	// Create output model types
 	outputModels := outputModelsWithoutLinkedFields(graphqlTypes, models)
@@ -282,9 +278,17 @@ func parseServerConfig(serverConfig ServerConfig) (*FinalServerConfig, []error) 
 	finalServerConfig.GraphQLQueries = queries
 
 	// Generate mutation resolvers
-	finalServerConfig.GraphQLMutations = graphql.Fields{
-		"test": nil,
+	mutationResolvables := []Resolvable{}
+	for _, model := range baseModels {
+		mutationResolvables = append(mutationResolvables, generateMutationsForModels(finalServerConfig, model)...)
 	}
+	utils.LogWhite("[Mutations - %d]", len(mutationResolvables))
+	mutations := graphql.Fields{}
+	for _, mutation := range mutationResolvables {
+		mutations[mutation.Name] = mutation.graphqlResolverEntry(allTypes)
+		utils.Log("  - %s", mutation.Name)
+	}
+	finalServerConfig.GraphQLMutations = mutations
 
 	return finalServerConfig, nil
 }

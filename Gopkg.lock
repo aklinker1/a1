@@ -2,40 +2,27 @@
 
 
 [[projects]]
-  digest = "1:cb9a871ee937e0fdbb506ac2a6af08d6ca698679ee3617edc41eef323adf8888"
-  name = "github.com/graphql-go/graphql"
-  packages = [
-    ".",
-    "gqlerrors",
-    "language/ast",
-    "language/kinds",
-    "language/lexer",
-    "language/location",
-    "language/parser",
-    "language/printer",
-    "language/source",
-    "language/typeInfo",
-    "language/visitor",
-  ]
-  pruneopts = ""
-  revision = "2b0b7340d2285b861482047fbf5de0488e021bea"
-  version = "v0.7.8"
+  name = "github.com/go-errors/errors"
+  packages = ["."]
+  revision = "a6af135bd4e28680facf08a3d206b454abc877a4"
+  version = "v1.0.1"
 
 [[projects]]
-  digest = "1:7df5a9695a743c3e1626b28bb8741602c8c15527e1efaeaec48ab2ff9a23f74c"
+  branch = "explicit-null"
+  name = "github.com/graphql-go/graphql"
+  packages = [".","gqlerrors","language/ast","language/kinds","language/lexer","language/location","language/parser","language/printer","language/source","language/typeInfo","language/visitor"]
+  revision = "f2c8ec7f243fcdc158b78ee80a031b778d3ea206"
+  source = "github.com/aklinker1/graphql"
+
+[[projects]]
   name = "github.com/joho/godotenv"
   packages = ["."]
-  pruneopts = ""
   revision = "23d116af351c84513e1946b527c88823e476be13"
   version = "v1.3.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = [
-    "github.com/graphql-go/graphql",
-    "github.com/graphql-go/graphql/language/ast",
-    "github.com/joho/godotenv",
-  ]
+  inputs-digest = "eb81a48ea957674eaf1ddb759567bfca423416d147031a547a6594018c4bd361"
   solver-name = "gps-cdcl"
   solver-version = 1

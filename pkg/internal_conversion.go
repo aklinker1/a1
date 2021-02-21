@@ -4,54 +4,41 @@ import (
 	"fmt"
 	"os"
 
+	utils "github.com/aklinker1/a1/pkg/utils"
 	graphql "github.com/graphql-go/graphql"
 )
 
-func convertTypes(types CustomTypeMap) FinalCustomTypeMap {
-	finalTypes := FinalCustomTypeMap{
-		"Bool": &FinalCustomType{
-			Name:        "Bool",
-			GraphQLType: graphql.Boolean,
-		},
-		"Int": &FinalCustomType{
-			Name:        "Int",
-			GraphQLType: graphql.Int,
-		},
-		// "Long": &FinalCustomType{
-		// 	Name:        "Long",
-		// 	GraphQLType: graphql.Long,
-		// },
-		"Float": &FinalCustomType{
-			Name:        "Float",
-			GraphQLType: graphql.Float,
-		},
-		// "Double": &FinalCustomType{
-		// 	Name:        "Double",
-		// 	GraphQLType: graphql.Double,
-		// },
-		"String": &FinalCustomType{
-			Name:        "String",
-			GraphQLType: graphql.String,
-		},
-		"ID": &FinalCustomType{
-			Name:        "ID",
-			GraphQLType: graphql.ID,
-		},
-		"Date": &FinalCustomType{
-			Name:        "Date",
-			GraphQLType: graphql.DateTime,
-		},
+func convertTypes(customTypes CustomTypeMap) FinalCustomTypeMap {
+	finalTypes := FinalCustomTypeMap{}
+
+	utils.LogWhite("[Builtin Types - %d]", len(builtinTypes))
+	for builtinTypeName, builtinType := range builtinTypes {
+		utils.Log("  - %s", builtinTypeName)
+		finalTypes[builtinTypeName] = convertType(builtinTypeName, builtinType)
 	}
-	for customTypeName, customType := range types {
-		finalTypes[customTypeName] = &FinalCustomType{
-			Name:        customTypeName,
-			Description: customType.Description,
-			ToJSON:      customType.ToJSON,
-			FromJSON:    customType.FromJSON,
-			FromLiteral: customType.FromLiteral,
+	utils.LogWhite("[Custom Types - %d]", len(customTypes))
+	for customTypeName, customType := range customTypes {
+		utils.Log("  - %s", customTypeName)
+		finalTypes[customTypeName] = convertType(customTypeName, customType)
+	}
+
+	return finalTypes
+}
+
+func convertType(name string, customType CustomType) *FinalCustomType {
+	if customType.GraphQLType != nil {
+		return &FinalCustomType{
+			Name:        name,
+			GraphQLType: customType.GraphQLType,
 		}
 	}
-	return finalTypes
+	return &FinalCustomType{
+		Name:        name,
+		Description: customType.Description,
+		ToJSON:      customType.ToJSON,
+		FromJSON:    customType.FromJSON,
+		FromLiteral: customType.FromLiteral,
+	}
 }
 
 func convertDataLoader(name string, dataLoader DataLoader) FinalDataLoader {
@@ -60,6 +47,7 @@ func convertDataLoader(name string, dataLoader DataLoader) FinalDataLoader {
 		Connect:     dataLoader.Connect,
 		GetOne:      dataLoader.GetOne,
 		GetMultiple: dataLoader.GetMultiple,
+		Update:      dataLoader.Update,
 	}
 }
 
@@ -177,6 +165,7 @@ func convertLinkedField(models FinalModelMap, fieldName string, field LinkedFiel
 		Name:              fieldName,
 		Description:       field.Description,
 		DeprecationReason: field.DeprecationReason,
+		IsNullable:        field.IsNullable,
 		LinkedModelName:   linkedModelName,
 		LinkedModel:       linkedModel,
 		Type:              field.Type,
@@ -287,14 +276,15 @@ func generateQueriesForModel(serverConfig *FinalServerConfig, model *FinalModel)
 }
 
 func generateMutationsForModels(serverConfig *FinalServerConfig, model *FinalModel) []Resolvable {
+	results := []Resolvable{}
 	if !model.GraphQL.DisableCreate {
 		// results = append(results, GetOneQuery(serverConfig, model))
 	}
 	if !model.GraphQL.DisableUpdate {
-		// results = append(results, GetOneQuery(serverConfig, model))
+		results = append(results, UpdateMutation(serverConfig, model))
 	}
 	if !model.GraphQL.DisableDelete {
 		// results = append(results, GetMultipleQuery(serverConfig, model))
 	}
-	return []Resolvable{}
+	return results
 }

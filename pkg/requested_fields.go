@@ -50,7 +50,7 @@ func createRequestedFieldMap(serverConfig *FinalServerConfig, model *FinalModel,
 					// TODO - Make recursive to handle linked object requirements, or just add the fields to the fieldNames object?
 					fieldMap[requiredFieldName] = RequestedField{
 						WasRequired: true,
-						Field:       virtualField,
+						Field:       model.Fields[requiredFieldName],
 						InnerFields: nil,
 						Model:       nil,
 					}

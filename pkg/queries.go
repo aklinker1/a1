@@ -120,10 +120,11 @@ func computeVirtualFields(
 ) (err error) {
 	for requestedFieldName, requestedField := range requestedFields {
 		if virtualField, ok := requestedField.Field.(*FinalVirtualField); ok {
-			data[requestedFieldName], err = virtualField.Compute(data)
+			computedValue, err := virtualField.Compute(data)
 			if err != nil {
 				return err
 			}
+			data[requestedFieldName] = computedValue
 		}
 	}
 	return nil

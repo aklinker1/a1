@@ -1,16 +1,32 @@
 package main
 
 import (
+	"fmt"
+
 	a1 "github.com/aklinker1/a1/pkg"
 )
 
 var customTypes = a1.CustomTypeMap{
 	"Email": a1.CustomType{
 		ToJSON: func(value interface{}) interface{} {
-			return value.(string)
+			if v, ok := value.(*string); ok {
+				if v == nil {
+					return nil
+				}
+				return *v
+			}
+			return fmt.Sprintf("%v", value)
 		},
 		FromJSON: func(value interface{}) interface{} {
-			return value.(string)
+			if v, ok := value.(*string); ok {
+				if v == nil {
+					fmt.Println("1")
+					return nil
+				}
+				fmt.Println("2")
+				return *v
+			}
+			return fmt.Sprintf("%v", value)
 		},
 		FromLiteral: func(value a1.ASTValue) interface{} {
 			return value.GetValue().(string)

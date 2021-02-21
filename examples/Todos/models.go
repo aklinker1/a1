@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	a1 "github.com/aklinker1/a1/pkg"
-	a1Types "github.com/aklinker1/a1/pkg/types"
 )
 
 func postgreSQLTable(tableName string) a1.DataLoaderConfig {
@@ -24,17 +23,17 @@ var models = a1.ModelMap{
 		},
 		Fields: a1.FieldMap{
 			"_id": a1.Field{
-				Type:       a1Types.String,
+				Type:       a1.Int,
 				PrimaryKey: true,
 				DataField:  "id",
 			},
-			"username": a1Types.String,
+			"username": a1.String,
 			"email": a1.Field{
 				Type:   "Email",
 				Hidden: true,
 			},
 			"passwordHash": a1.Field{
-				Type:      a1Types.String,
+				Type:      a1.String,
 				Hidden:    true,
 				DataField: "password_hash",
 			},
@@ -51,14 +50,23 @@ var models = a1.ModelMap{
 		Fields: a1.FieldMap{
 			"email":      "Email",
 			"validation": "Validation",
-			"firstName":  a1Types.String,
-			"lastName":   a1Types.String,
+			"firstName":  a1.NullableString,
+			"lastName":   a1.NullableString,
 
 			"fullName": a1.VirtualField{
-				Type:           a1Types.String,
+				Type:           a1.NullableString,
 				RequiredFields: []string{"firstName", "lastName"},
 				Compute: func(data map[string]interface{}) (interface{}, error) {
-					return fmt.Sprintf("%s %s", data["firstName"], data["lastName"]), nil
+					firstName := data["firstName"]
+					lastName := data["lastName"]
+					if firstName != nil && lastName != nil {
+						return fmt.Sprintf("%s %s", firstName, lastName), nil
+					} else if firstName != nil {
+						return firstName, nil
+					} else if lastName != nil {
+						return lastName, nil
+					}
+					return nil, nil
 				},
 			},
 
@@ -85,12 +93,12 @@ var models = a1.ModelMap{
 		},
 		Fields: a1.FieldMap{
 			"_id": a1.Field{
-				Type:       a1Types.String,
+				Type:       a1.Int,
 				PrimaryKey: true,
 				DataField:  "id",
 			},
 			"_userId": a1.Field{
-				Type:      a1Types.ID,
+				Type:      a1.Int,
 				DataField: "user_id",
 			},
 			"theme": "Theme",
@@ -107,17 +115,17 @@ var models = a1.ModelMap{
 		DataLoader: postgreSQLTable("todos"),
 		Fields: a1.FieldMap{
 			"_id": a1.Field{
-				Type:       a1Types.String,
+				Type:       a1.Int,
 				PrimaryKey: true,
 				DataField:  "id",
 			},
 			"_userId": a1.Field{
-				Type:      a1Types.ID,
+				Type:      a1.Int,
 				DataField: "user_id",
 			},
-			"message": a1Types.String,
+			"message": a1.String,
 			"isCompleted": a1.Field{
-				Type:      a1Types.Bool,
+				Type:      a1.Bool,
 				DataField: "is_completed",
 			},
 
@@ -137,9 +145,12 @@ var models = a1.ModelMap{
 	},
 	"Tag": a1.Model{
 		DataLoader: postgreSQLTable("tags"),
+		GraphQL: a1.GraphQLConfig{
+			DisableUpdate: true,
+		},
 		Fields: a1.FieldMap{
 			"_name": a1.Field{
-				Type:       a1Types.String,
+				Type:       a1.String,
 				PrimaryKey: true,
 				DataField:  "name",
 			},
@@ -163,19 +174,19 @@ var models = a1.ModelMap{
 		},
 		Fields: a1.FieldMap{
 			"_id": a1.Field{
-				Type:       a1Types.String,
+				Type:       a1.Int,
 				PrimaryKey: true,
 				DataField:  "id",
 			},
 			"_todoId": a1.Field{
-				Type:      a1Types.String,
+				Type:      a1.String,
 				DataField: "todo_id",
 			},
 			"_tagName": a1.Field{
-				Type:      a1Types.String,
+				Type:      a1.String,
 				DataField: "tag_name",
 			},
-			"addedAt": a1Types.Date,
+			"addedAt": a1.NullableDate,
 
 			"tag": a1.LinkedField{
 				LinkedModel: "Tag",

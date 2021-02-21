@@ -23,15 +23,19 @@ var users = map[interface{}]map[string]interface{}{
 		"email":      "example2@gmail.com",
 		"validation": 1,
 		"firstName":  "Isaiah",
-		"lastName":   "Walker",
 	},
 	3: map[string]interface{}{
 		"id":         3,
 		"username":   "klinker44",
 		"email":      "example3@gmail.com",
 		"validation": 2,
-		"firstName":  "Luke",
 		"lastName":   "Klinker",
+	},
+	4: map[string]interface{}{
+		"id":         4,
+		"username":   "unknown",
+		"email":      "unknown@gmail.com",
+		"validation": 2,
 	},
 }
 
@@ -50,6 +54,11 @@ var preferences = map[interface{}]map[string]interface{}{
 		"id":      13,
 		"user_id": 3,
 		"theme":   2,
+	},
+	14: map[string]interface{}{
+		"id":      14,
+		"user_id": 4,
+		"theme":   1,
 	},
 }
 
